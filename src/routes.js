@@ -11,7 +11,6 @@ const {
     addArticleHandler, 
     getAllArticleHandler, 
     getArticleByIdAdminHandler, 
-    getArticleByIdAdminHandler, 
     editArticleByIdAdminHandler,
     deleteArticleByIdAdminHandler,
     addAdminProfileHandler,
@@ -25,7 +24,7 @@ const routes = [
     // -----------------------------------> Profile <------------------------------------ //
     {
         method: 'POST',
-        path: '/',
+        path: '/profile',
         handler: addUserProfileHandler,
     },
     {

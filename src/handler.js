@@ -124,7 +124,6 @@ module.exports = {
     addArticleHandler, 
     getAllArticleHandler, 
     getArticleByIdAdminHandler, 
-    getArticleByIdAdminHandler, 
     editArticleByIdAdminHandler,
     deleteArticleByIdAdminHandler,
     addAdminProfileHandler,
