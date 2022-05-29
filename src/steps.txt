@@ -1,0 +1,72 @@
+1. Membuat folder projek
+2. npm init -y
+3. npm install nodemon --save-dev
+==> wajib digunakan selama proses pengembangan. Pasalnya, dengan tools ini kita tak perlu menjalankan ulang server ketika terjadi perubahan pada berkas JavaScript. Nodemon akan mendeteksi perubahan kode JavaScript dan mengeksekusi ulang secara otomatis.
+4. npm install eslint --save-dev
+==>  membantu atau membimbing Anda untuk selalu menuliskan kode JavaScript dengan gaya yang konsisten
+5. npx eslint --init
+==> konfigurasi terlebih dahulu
+6. Menambahkan --> "lint": "eslint ./" di script package.json
+==> ESLint digunakan untuk memeriksa kode JavaScript yang ada pada proyek.
+7. Melakukan perintah npm run lint pada Terminal proyek
+==> fungsinya dapat menunjukkan letak kode yg salah
+8. Menambahkan --> "no-console": "off" di file .eslintrc.json pada bagian rules
+9. npm install @hapi/hapi
+10. Menambahkan kode ini ke file .eslintrc.json
+"folders": [
+        {
+            "path": "project-a"
+        },
+        {
+            "path": "project-b"
+        }
+    ],
+    "settings": {
+        "eslint.nodePath": "myCustomNodePath"
+}
+11. isi file server.js sesuai kebutuhan
+12. isi file notes.js, routes.js dan handler.js sesuai kebutuhan
+13. npm install nanoid
+==> Kriteria menyebutkan, properti id merupakan string dan harus unik, dengan menggunakan bantuan library pihak ketiga untuk menghasilkan nilainya. nanoid merupakan salah satu library yang populer untuk menangani ini. 
+14. Menambahkan kode ini utk mengatasi same-origin-policy di server.js
+    options: {
+        cors: {
+          origin: ['*'],
+        },
+    },
+    Bila ingin cakupannya lebih luas alias CORS diaktifkan di seluruh route yang ada di server
+    routes: {
+        cors: {
+            origin: ['*'],
+        },
+    },
+
+15. npm install hapi-mongodb --save
+***
+BUAT MENGATASI CORS:
+chrome://flags/#block-insecure-private-network-requests
+
+// Add a new movie to the database
+server.route({
+    method: 'POST',
+    path: '/movies',
+    handler: async (req, h) => {
+
+        const payload = req.payload
+
+        const status = await req.mongo.db.collection('movies').insertOne(payload);
+
+        return status;
+    }
+});
+
+The payload that we are going to submit to this endpoint will look like this: 
+
+.. code-block:: javascript
+
+{
+     "title": "Avengers: Endgame",
+     "plot": "The avengers save the day",
+     "cast" : ["Robert Downey Jr.", "Chris Evans", "Scarlett Johansson", "Samuel L. Jackson"],
+     "year": 2019
+}  

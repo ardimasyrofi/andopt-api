@@ -75,15 +75,14 @@ client.connect((error, client) => {
             })
     );
     */
-    // update data by Id ==> ERROR
-    /*
+    // change data by Id ==> ERROR
     const updatePromise = db.collection('users').updateOne(
         {
-            _id: '628a3fba2f279b27314df15c',
+            _id: ObjectId('628a36ba492d1dee6f29642e'),
         },
         {
             $set: {
-                email: 'dianrosz@yahoo.com',
+                username: 'Rida',
             },
         }
     );
@@ -93,5 +92,61 @@ client.connect((error, client) => {
     }).catch((error) => {
         console.log(error);
     });
+   // change documents by criteria ==> CAN
+   /*
+   const updatePromises = db.collection('users').updateMany(
+        {
+            username: 'Vrizasss',
+        },
+        {
+            $set: {
+                username: 'Vriz',
+            }
+        }
+    )
+    updatePromises.then((result) => {
+        console.log(result);
+    }).catch((error) => {
+        console.log(error);
+    })
+    */
+   // remove data by Id ==> ERROR
+   /*
+   db.collection('users')
+       .deleteOne({
+           _id: ObjectID('628a36ba492d1dee6f29642e'),
+       })
+       .then((result) => {
+           console.log(result);
+       })
+       .catch((error) => {
+           console.log(error);
+       });
+    */
+   // remove data by username ==> CAN
+   /*
+   db.collection('users')
+       .deleteOne({
+           username: 'Vriz',
+       })
+       .then((result) => {
+           console.log(result);
+       })
+       .catch((error) => {
+           console.log(error);
+       });
+    */
+   // remove datas ==> CAN
+   /*
+   db.collection('users')
+       .deleteMany({
+           username: 'Vriz',
+       })
+       .then((result) => {
+           console.log(result);
+       })
+       .catch((error) => {
+           console.log(error);
+       });
     */
 });

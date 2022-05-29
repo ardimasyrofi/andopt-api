@@ -1,20 +1,40 @@
 //import nanoid from package
-const { nanoid } = require('nanoid');
 const users = require('./users'); 
-const admin = require('./administrators'); 
-const spv = require('./supervisors'); 
+const hapiMongodb = require('hapi-mongodb');
+var nanoid = require('nanoid');
+const mongoose = require('mongoose');
+// const admin = require('./administrators'); 
+// const spv = require('./supervisors'); 
 
 // -------------------------------------> USER <------------------------------------- //
 // -----------------------------------> Profile <------------------------------------ //
 
+var user = new mongoose.Schema({
+    username: String,
+    email: String,
+    address: String,
+});
+
+const userCollection = mongoose.model('user', user);
 // utk method POST for Register
 const addUserProfileHandler = (request, h) => {
     // statement
+    
 };
 
 // utk method GET
-const getAllUserProfileHandler = () => ({
+const getAllDataUserProfileHandler = async(req, h) => ({
     // statement
+    // const userOne = await userCollection.find().exec();
+    // // console.log(userOne)
+
+    // const response = h.response({
+    //     status: 'success',
+    //     message: 'test user',
+    //     data: userOne
+    // }).code(200);
+
+    // return response;
 });
 
 // GET dengan ID
@@ -112,22 +132,25 @@ const editAdminProfileByIdSpvHandler = (request, h) => {
 };
 
 module.exports = { 
-    addUserProfileHandler, 
-    getAllUserProfileHandler, 
-    getUserProfileByIdHandler, 
-    editUserProfileByIdHandler,
-    addAnimalPostHandler,
-    getAllAnimalPostHandler,
-    getAnimalPostByIdUserHandler,
-    editAnimalPostByIdUserHandler,
-    deleteAnimalPostByIdUserHandler,
-    addArticleHandler, 
-    getAllArticleHandler, 
-    getArticleByIdAdminHandler, 
-    editArticleByIdAdminHandler,
-    deleteArticleByIdAdminHandler,
-    addAdminProfileHandler,
-    getAllAdminProfileHandler,
-    getAdminProfileByIdSpvHandler,
-    editAdminProfileByIdSpvHandler
- };
+    getAllDataUserProfileHandler, 
+};
+
+/*
+getAllUserProfileHandler, 
+getUserProfileByIdHandler, 
+editUserProfileByIdHandler,
+addAnimalPostHandler,
+getAllAnimalPostHandler,
+getAnimalPostByIdUserHandler,
+editAnimalPostByIdUserHandler,
+deleteAnimalPostByIdUserHandler,
+addArticleHandler, 
+getAllArticleHandler, 
+getArticleByIdAdminHandler, 
+editArticleByIdAdminHandler,
+deleteArticleByIdAdminHandler,
+addAdminProfileHandler,
+getAllAdminProfileHandler,
+getAdminProfileByIdSpvHandler,
+editAdminProfileByIdSpvHandler
+*/
