@@ -4,7 +4,6 @@ const { Schema } = Mongoose;
 
 const AdminSchema = new Schema({
     username: String,
-    password: String,
     email: String,
     address: String,
 });
