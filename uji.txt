@@ -1,3 +1,5 @@
-Uji di 
 
-npm run start
+
+npm i inert
+npm i hapi-auth-basic
+npm i hapi-auth-cookie

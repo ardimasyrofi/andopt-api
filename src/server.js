@@ -1,6 +1,7 @@
 const Hapi = require('@hapi/hapi');
 const Mongoose = require('mongoose');
-const routes = require('./routes');
+const UserRoutes = require('./routes/UserRoutes');
+const AdminRoutes = require('./routes/AdminRoutes');
 
 const init = async () => {
     const server = Hapi.server({
@@ -19,7 +20,8 @@ const init = async () => {
         console.log('Connected to MongoDB');
     });
 
-    server.route(routes);
+    server.route(UserRoutes);
+    server.route(AdminRoutes);
 
     await server.start();
     console.log('Server running on %s', server.info.uri);

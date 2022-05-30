@@ -1,5 +1,5 @@
 const Joi = require('joi');
-const UserController = require('./controllers/UserController');
+const UserController = require('../controllers/UserController');
 
 const routes = [
   {
@@ -18,13 +18,13 @@ const routes = [
   },
   {
     method: 'GET',
-    path: '/users',
-    handler: UserController.getAllUsers,
-  },
-  {
-    method: 'GET',
     path: '/users/{id}',
     handler: UserController.getUser,
+  },
+  {
+    method: 'PUT',
+    path: '/users/{id}',
+    handler: UserController.updateUser,
   },
 ];
 

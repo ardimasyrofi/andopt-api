@@ -1,4 +1,9 @@
+const { response } = require('@hapi/hapi/lib/validation');
 const UserModel = require('../models/UserModel');
+
+// KENDALA :
+// 1. username atau email yg masuk belum sensitive pd huruf kapital
+// 2. data yg sdh diupadted, belum bisa menampilkan data 
 
 const validateUsername = async (username) => {
     const user = await UserModel.findOne({ username });
@@ -48,8 +53,93 @@ exports.getUser = async(request, h) => {
 
     const response = h.response({
         status: 'success',
-        message: 'test',
+        message: 'Berhasil!',
         data: user
     }).code(200);
+    
     return response;
+};
+
+exports.updateUser = async(request, h) => {
+    const checkId = await UserModel.find({_id: request.params.id}).exec();
+    console.log(checkId)
+    if(!checkId) {
+        const response = h.response({
+            status: 'fail',
+            message: 'Data not find!'
+        }).code(404);
+        
+        return response;
+    }
+    
+    // KENDALA TIDAK BISA MENAMPILKAN DATA YG SDH DI UPDATE
+    try {
+        const user = new UserModel(request.payload);
+        const validationUsername = await validateUsername(user.username);
+        const validationEmail = await validateEmail(user.email);
+
+        if (!validationUsername || !validationEmail) {
+            if (!validationUsername) {
+                const response = h.response({
+                    message: 'Username already exists',
+                }).code(400);
+
+                return response;
+            }
+            else if (!validationEmail) {
+                const response = h.response({
+                    message: 'Email already exists',
+                }).code(400);
+
+                return response
+            }
+        }
+        const updatedUser = await UserModel.updateOne({_id: request.params.id}, {$set: request.payload});
+        
+        const response = h.response({
+            status: 'success',
+            message: 'Data was updated!',
+            data: updatedUser
+        }).code(200);
+        
+        return response;
+    } catch(error) {
+        const response = h.response({
+            status: 'fail',
+            message: 'Error!'
+        }).code(400);
+
+        return response;
+    }
+};
+
+exports.deleteUser = async(request, h) => {
+    const checkId = await UserModel.find({_id: request.params.id}).exec();
+    console.log(checkId)
+    if(!checkId) {
+        const response = h.response({
+            status: 'fail',
+            message: 'Data not find!'
+        }).code(404);
+        
+        return response;
+    }
+    
+    try {
+        const deletedUser = await UserModel.deleteOne({_id: request.params.id}, {$set: request.payload});
+        
+        const response = h.response({
+            status: 'success',
+            message: 'Data was deleted!',
+        }).code(200);
+        
+        return response;
+    } catch(error) {
+        const response = h.response({
+            status: 'fail',
+            message: 'Error!'
+        }).code(400);
+
+        return response;
+    }
 };
