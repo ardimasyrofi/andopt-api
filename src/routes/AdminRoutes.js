@@ -17,11 +17,17 @@ const routes = [
     },
     handler: AdminController.addAdmin,
   },
+  
   // Admin bisa melihat akun semua user
   {
     method: 'GET',
     path: '/users',
     handler: AdminController.getAllUsers,
+  },
+  {
+    method: 'GET',
+    path: '/users/{id}',
+    handler: UserController.get_User,
   },
   {
     method: 'GET',
