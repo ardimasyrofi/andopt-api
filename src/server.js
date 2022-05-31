@@ -9,6 +9,26 @@ const init = async () => {
         host: 'localhost'
     });
 
+    await server.register(require('@hapi/cookie'));
+
+    server.auth.strategy('session', 'cookie', {
+        cookie: {
+            name: 'sid-example',
+            password: 'password-should-be-32-characters',
+            isSecure: false
+        },
+        redirectTo: '/login',
+        validateFunc: async (request, session) => {
+            const account = await User.findOne({ _id: session.id });
+            if (!account) {
+                return { valid: false };
+            }
+            return { valid: true, credentials: account };
+        }
+    });
+
+    server.auth.default('session');
+
     Mongoose.connect("mongodb+srv://mv4:0987poiu@andopt-app-maviav1.tmpnc.mongodb.net/andopt-api",{ 
         useNewUrlParser: true,
         useUnifiedTopology: true

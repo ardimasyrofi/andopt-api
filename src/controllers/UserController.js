@@ -1,5 +1,6 @@
 const { response } = require('@hapi/hapi/lib/validation');
 const UserModel = require('../models/UserModel');
+const Bcrypt = require('bcrypt');
 
 // KENDALA :
 // 1. username atau email yg masuk belum sensitive pd huruf kapital
@@ -35,36 +36,114 @@ const validateEmail = async (email, id = null) => {
     return true;
 };
 
-exports.addUser = async (request, h) => {
-    const reqUser = new UserModel(request.payload);
-    const username = reqUser.username.toLowerCase();
-    const email = reqUser.email.toLowerCase();
-    const address = reqUser.address;
+exports.loginHandler = async(request, h) => {
+    try {
+        const { username, password } = request.payload;
+        const lowerUsername = username.toLowerCase();
+        const user = await UserModel.findOne({username: lowerUsername}).exec();
 
-    const user = {
-        username,
-        email,
-        address
+        if (!user) {
+            const response = h.response({
+                status: 'fail',
+                message: 'Username not found!'
+            }).code(404);
+            
+            return response;
+        }
+
+        if (!Bcrypt.compareSync(password, user.password)) {
+            const response = h.response({
+                status: 'fail',
+                message: 'Password is incorrect!'
+            }).code(404);
+            
+            return response;
+        }
+
+        request.cookieAuth.set({ id: user._id });
+
+        const response = h.response({
+            status: 'success',
+            message: 'Login success!'
+        }).code(200);
+        
+        return response;
+    } catch(error) {
+        const response = h.response({
+            status: 'fail',
+            message: 'Error!'
+        }).code(400);
+
+        return response;
     }
+}
 
-    const validationUsername = await validateUsername(username);
-    const validationEmail = await validateEmail(email);
+exports.registerHandler = async (request, h) => {
+    try {
+        const { username, email, password, confirmPassword } = request.payload;
 
-    if (!validationUsername || !validationEmail) {
-        if (!validationUsername) {
+        if (password !== confirmPassword) {
             return h.response({
-                message: 'Username already exists',
+                statusCode: 400,
+                error: 'Password dan konfirmasi password tidak sama',
             }).code(400);
         }
-        else if (!validationEmail) {
-            return h.response({
-                message: 'Email already exists',
-            }).code(400);
+
+        const lowerUsername = username.toLowerCase();
+        const lowerEmail = email.toLowerCase();
+        const validationUsername = await validateUsername(lowerUsername);
+        const validationEmail = await validateEmail(lowerEmail);
+
+        const user = {
+            username: lowerUsername,
+            email: lowerEmail,
+            password: Bcrypt.hashSync(password, 10)
         }
+
+        if (!validationUsername || !validationEmail) {
+            if (!validationUsername) {
+                const response = h.response({
+                    message: 'Username already exists',
+                }).code(400);
+
+                return response;
+            }
+            else if (!validationEmail) {
+                const response = h.response({
+                    message: 'Email already exists',
+                }).code(400);
+
+                return response
+            }
+        }
+        const account = await UserModel.create(user);
+
+        if (!account) {
+            const response = h.response({
+                status: 'fail',
+                message: 'Error!'
+            }).code(400);
+
+            return response;
+        }
+
+        request.cookieAuth.set({ id: account._id });
+
+        const response = h.response({
+            status: 'success',
+            message: 'Data was added!',
+            data: account
+        }).code(200);
+        
+        return response;
+    } catch(error) {
+        const response = h.response({
+            status: 'fail',
+            message: 'Error!'
+        }).code(400);
+
+        return response;
     }
-    
-    await user.save();
-    return h.response(user).code(201);
 };
 
 exports.getAllUsers = async (request, h) => {
@@ -96,17 +175,17 @@ exports.updateUser = async(request, h) => {
             return response;
         }
         
-        const username = request.payload.username.toLowerCase();
-        const email = request.payload.email.toLowerCase();
-        const address = request.payload.address;
+        const { username, email, password} = request.payload;
+        const lowerUsername = username.toLowerCase();
+        const lowerEmail = email.toLowerCase();
         
-        const validationUsername = await validateUsername(username, request.params.id);
-        const validationEmail = await validateEmail(email, request.params.id);
+        const validationUsername = await validateUsername(lowerUsername, request.params.id);
+        const validationEmail = await validateEmail(lowerEmail, request.params.id);
 
         const user = {
-            username,
-            email,
-            address
+            username: lowerUsername,
+            email: lowerEmail,
+            password: Bcrypt.hashSync(password, 10)
         }
 
         if (!validationUsername || !validationEmail) {
