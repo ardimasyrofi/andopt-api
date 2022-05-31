@@ -5,16 +5,30 @@ const UserModel = require('../models/UserModel');
 // 1. username atau email yg masuk belum sensitive pd huruf kapital
 // 2. data yg sdh diupadted, belum bisa menampilkan data 
 
-const validateUsername = async (username) => {
-    const user = await UserModel.findOne({ username });
+const validateUsername = async (username, id = null) => {
+    let user = null;
+
+    if (id) {
+        user = await UserModel.findOne({ username, _id: { $ne: id } });
+    } else {
+        user = await UserModel.findOne({ username });
+    }
+
     if (user) {
         return false;
     }
     return true;
 };
 
-const validateEmail = async (email) => {
-    const user = await UserModel.findOne({ email });
+const validateEmail = async (email, id = null) => {
+    let user = null;
+    
+    if (id) {
+        user = await UserModel.findOne({ email, _id: { $ne: id } });
+    } else {
+        user = await UserModel.findOne({ email });
+    }
+    
     if (user) {
         return false;
     }
@@ -61,22 +75,22 @@ exports.getUser = async(request, h) => {
 };
 
 exports.updateUser = async(request, h) => {
-    const checkId = await UserModel.find({_id: request.params.id}).exec();
-    console.log(checkId)
-    if(!checkId) {
-        const response = h.response({
-            status: 'fail',
-            message: 'Data not find!'
-        }).code(404);
-        
-        return response;
-    }
-    
-    // KENDALA TIDAK BISA MENAMPILKAN DATA YG SDH DI UPDATE
+        // KENDALA TIDAK BISA MENAMPILKAN DATA YG SDH DI UPDATE
     try {
+        const checkUser = await UserModel.findOne({_id: request.params.id}).exec();
+        console.log(checkUser)
+        if(!checkUser) {
+            const response = h.response({
+                status: 'fail',
+                message: 'Data not found!'
+            }).code(404);
+            
+            return response;
+        }
+        
         const user = new UserModel(request.payload);
-        const validationUsername = await validateUsername(user.username);
-        const validationEmail = await validateEmail(user.email);
+        const validationUsername = await validateUsername(user.username, request.params.id);
+        const validationEmail = await validateEmail(user.email, request.params.id);
 
         if (!validationUsername || !validationEmail) {
             if (!validationUsername) {
@@ -94,7 +108,8 @@ exports.updateUser = async(request, h) => {
                 return response
             }
         }
-        const updatedUser = await UserModel.updateOne({_id: request.params.id}, {$set: request.payload});
+        await UserModel.updateOne({_id: request.params.id}, {$set: request.payload});
+        const updatedUser = await UserModel.findOne({_id: request.params.id}).exec();
         
         const response = h.response({
             status: 'success',
@@ -119,7 +134,7 @@ exports.deleteUser = async(request, h) => {
     if(!checkId) {
         const response = h.response({
             status: 'fail',
-            message: 'Data not find!'
+            message: 'Data not found!'
         }).code(404);
         
         return response;
