@@ -36,9 +36,19 @@ const validateEmail = async (email, id = null) => {
 };
 
 exports.addUser = async (request, h) => {
-    const user = new UserModel(request.payload);
-    const validationUsername = await validateUsername(user.username);
-    const validationEmail = await validateEmail(user.email);
+    const reqUser = new UserModel(request.payload);
+    const username = reqUser.username.toLowerCase();
+    const email = reqUser.email.toLowerCase();
+    const address = reqUser.address;
+
+    const user = {
+        username,
+        email,
+        address
+    }
+
+    const validationUsername = await validateUsername(username);
+    const validationEmail = await validateEmail(email);
 
     if (!validationUsername || !validationEmail) {
         if (!validationUsername) {
@@ -75,10 +85,8 @@ exports.getUser = async(request, h) => {
 };
 
 exports.updateUser = async(request, h) => {
-        // KENDALA TIDAK BISA MENAMPILKAN DATA YG SDH DI UPDATE
     try {
         const checkUser = await UserModel.findOne({_id: request.params.id}).exec();
-        console.log(checkUser)
         if(!checkUser) {
             const response = h.response({
                 status: 'fail',
@@ -88,9 +96,18 @@ exports.updateUser = async(request, h) => {
             return response;
         }
         
-        const user = new UserModel(request.payload);
-        const validationUsername = await validateUsername(user.username, request.params.id);
-        const validationEmail = await validateEmail(user.email, request.params.id);
+        const username = request.payload.username.toLowerCase();
+        const email = request.payload.email.toLowerCase();
+        const address = request.payload.address;
+        
+        const validationUsername = await validateUsername(username, request.params.id);
+        const validationEmail = await validateEmail(email, request.params.id);
+
+        const user = {
+            username,
+            email,
+            address
+        }
 
         if (!validationUsername || !validationEmail) {
             if (!validationUsername) {
@@ -108,7 +125,7 @@ exports.updateUser = async(request, h) => {
                 return response
             }
         }
-        await UserModel.updateOne({_id: request.params.id}, {$set: request.payload});
+        await UserModel.updateOne({_id: request.params.id}, {$set: user});
         const updatedUser = await UserModel.findOne({_id: request.params.id}).exec();
         
         const response = h.response({
