@@ -4,17 +4,37 @@ const UserController = require('../controllers/UserController');
 const routes = [
   {
     method: 'POST',
-    path: '/users',
+    path: '/register',
     options: {
       validate: {
         payload: Joi.object({
           username: Joi.string().required(),
           email: Joi.string().required(),
-          address: Joi.string().required(),
+          password: Joi.string().required(),
+          confirmPassword: Joi.string().required(),
         }),
       },
+      auth: {
+        mode: 'try',
+      }
     },
-    handler: UserController.addUser,
+    handler: UserController.registerHandler,
+  },
+  {
+    method: 'POST',
+    path: '/login',
+    options: {
+      validate: {
+        payload: Joi.object({
+          username: Joi.string().required(),
+          password: Joi.string().required(),
+        }),
+      },
+      auth: {
+        mode: 'try',
+      }
+    },
+    handler: UserController.loginHandler,
   },
   {
     method: 'GET',
@@ -24,6 +44,15 @@ const routes = [
   {
     method: 'PUT',
     path: '/users/{id}',
+    options: {
+      validate: {
+        payload: Joi.object({
+          username: Joi.string().required(),
+          email: Joi.string().required(),
+          password: Joi.string().required(),
+        }),
+      },
+    },
     handler: UserController.updateUser,
   },
 ];

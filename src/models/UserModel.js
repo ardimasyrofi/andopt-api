@@ -5,7 +5,7 @@ const { Schema } = Mongoose;
 const UserSchema = new Schema({
     username: String,
     email: String,
-    address: String,
+    password: String,
 });
 
 module.exports = Mongoose.model('user', UserSchema);

@@ -13,6 +13,18 @@ exports.getAllUsers = async (request, h) => {
     return h.response(users);
 };
 
+exports.get_User = async(request, h) => {
+    const user = await UserModel.find({_id: request.params.id}).exec();
+
+    const response = h.response({
+        status: 'success',
+        message: 'Berhasil!',
+        data: user
+    }).code(200);
+    
+    return response;
+};
+
 exports.getAdmin = async(request, h) => {
     
 };
