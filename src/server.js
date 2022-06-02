@@ -1,33 +1,25 @@
 const Hapi = require('@hapi/hapi');
+const { initializeApp, cert } = require('firebase-admin/app');
+const serviceAccount = require("./serviceAccountKey.json");
 const Mongoose = require('mongoose');
 const UserRoutes = require('./routes/UserRoutes');
 const AdminRoutes = require('./routes/AdminRoutes');
 
 const init = async () => {
     const server = Hapi.server({
-        port: 3000,
-        host: 'localhost'
-    });
-
-    await server.register(require('@hapi/cookie'));
-
-    server.auth.strategy('session', 'cookie', {
-        cookie: {
-            name: 'sid-example',
-            password: 'password-should-be-32-characters',
-            isSecure: false
-        },
-        redirectTo: '/login',
-        validateFunc: async (request, session) => {
-            const account = await User.findOne({ _id: session.id });
-            if (!account) {
-                return { valid: false };
+        port: 4000,
+        host: 'localhost',
+        routes: {
+            cors: {
+            origin: ['*']
             }
-            return { valid: true, credentials: account };
         }
     });
 
-    server.auth.default('session');
+    initializeApp({
+        credential: cert(serviceAccount),
+    });
+
 
     Mongoose.connect("mongodb+srv://mv4:0987poiu@andopt-app-maviav1.tmpnc.mongodb.net/andopt-api",{ 
         useNewUrlParser: true,
@@ -41,7 +33,7 @@ const init = async () => {
     });
 
     server.route(UserRoutes);
-    server.route(AdminRoutes);
+    // server.route(AdminRoutes);
 
     await server.start();
     console.log('Server running on %s', server.info.uri);

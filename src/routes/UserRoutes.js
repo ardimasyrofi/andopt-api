@@ -4,57 +4,36 @@ const UserController = require('../controllers/UserController');
 const routes = [
   {
     method: 'POST',
-    path: '/register',
+    path: '/user/register',
     options: {
       validate: {
         payload: Joi.object({
-          username: Joi.string().required(),
-          email: Joi.string().required(),
-          password: Joi.string().required(),
-          confirmPassword: Joi.string().required(),
+          uid: Joi.string().required(),
+          address: Joi.array().optional(),
         }),
       },
-      auth: {
-        mode: 'try',
-      }
     },
     handler: UserController.registerHandler,
   },
-  {
-    method: 'POST',
-    path: '/login',
-    options: {
-      validate: {
-        payload: Joi.object({
-          username: Joi.string().required(),
-          password: Joi.string().required(),
-        }),
-      },
-      auth: {
-        mode: 'try',
-      }
-    },
-    handler: UserController.loginHandler,
-  },
-  {
-    method: 'GET',
-    path: '/users/{id}',
-    handler: UserController.getUser,
-  },
-  {
-    method: 'PUT',
-    path: '/users/{id}',
-    options: {
-      validate: {
-        payload: Joi.object({
-          username: Joi.string().required(),
-          email: Joi.string().required(),
-          password: Joi.string().required(),
-        }),
-      },
-    },
-    handler: UserController.updateUser,
-  },
+  // {
+  //   method: 'GET',
+  //   path: '/users/{id}',
+  //   handler: UserController.getUser,
+  // },
+  // {
+  //   method: 'PUT',
+  //   path: '/users/{id}',
+  //   options: {
+  //     validate: {
+  //       payload: Joi.object({
+  //         username: Joi.string().required(),
+  //         email: Joi.string().required(),
+  //         password: Joi.string().required(),
+  //       }),
+  //     },
+  //   },
+  //   handler: UserController.updateUser,
+  // },
 ];
 
 module.exports = routes;
