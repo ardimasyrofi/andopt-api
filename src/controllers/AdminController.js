@@ -1,66 +1,77 @@
-const { response } = require('@hapi/hapi/lib/validation');
-const AdminModel = require('../models/AdminModel');
 const UserModel = require('../models/UserModel');
+const { getAuth } = require('firebase-admin');
 
-
-exports.addAdmin = async (request, h) => {
-
-};
-
-// Admin bisa melihat akun semua user
+// -----------------> GET : DATA USER -----------------> //
 exports.getAllUsers = async (request, h) => {
-    const users = await UserModel.find();
-    return h.response(users);
-};
-
-exports.get_User = async(request, h) => {
-    const user = await UserModel.find({_id: request.params.id}).exec();
-
-    const response = h.response({
-        status: 'success',
-        message: 'Berhasil!',
-        data: user
-    }).code(200);
-    
-    return response;
-};
-
-exports.getAdmin = async(request, h) => {
-    
-};
-
-exports.updateAdmin = async(request, h) => {
-    
-};
-
-// Admin yg bs menghapus akun user
-exports.deleteUser = async(request, h) => {
-    const checkId = await UserModel.find({_id: request.params.id}).exec();
-    console.log(checkId)
-    if(!checkId) {
-        const response = h.response({
-            status: 'fail',
-            message: 'Data not find!'
-        }).code(404);
-        
-        return response;
-    }
-    
+    // Tambahan to other
+    let user = null;
     try {
-        const deletedUser = await UserModel.deleteOne({_id: request.params.id}, {$set: request.payload});
-        
-        const response = h.response({
-            status: 'success',
-            message: 'Data was deleted!',
-        }).code(200);
-        
-        return response;
-    } catch(error) {
+        const {'x-firebase-token': token} = request.headers;
+        const decodedToken = await getAuth().verifyIdToken(token);
+        const { uid } = decodedToken;
+        user = await UserModel.findOne({uid}).exec();
+    } catch (error) {
         const response = h.response({
             status: 'fail',
-            message: 'Error!'
+            message: 'Invalid Token!'
         }).code(400);
 
         return response;
     }
+
+    // const users = await UserModel.find();
+    // return h.response(users);
+    
+    try {
+        // const {role} = request.payload;
+        if(user.role === 'admin') {
+        // if(role === 'admin') {
+            const users = await UserModel.find();
+            return h.response(users);
+        }
+    } catch (error) {
+        const response = h.response({
+            status: 'fail',
+            message: 'Server Error!'
+        }).code(500);
+
+        return response;
+    }
 };
+
+exports.getUser = async(request, h) => {
+    let user = null;
+    try {
+        const {'x-firebase-token': token} = request.headers;
+        const decodedToken = await getAuth().verifyIdToken(token);
+        const { uid } = decodedToken;
+        user = await UserModel.findOne({uid}).exec();
+    } catch (error) {
+        const response = h.response({
+            status: 'fail',
+            message: 'Invalid Token!'
+        }).code(400);
+
+        return response;
+    }
+
+    // const users = await UserModel.findOne({uid: request.params.uid});
+    // return h.response(users);
+
+    try {
+        // const {role} = request.payload;
+        if(user.role === 'admin') {
+        // if(role === 'admin') {
+            const users = await UserModel.findOne({uid: request.params.uid});
+            return h.response(users);
+        }
+    } catch (error) {
+        const response = h.response({
+            status: 'fail',
+            message: 'Server Error!'
+        }).code(500);
+
+        return response;
+    }
+};
+

@@ -15,25 +15,24 @@ const routes = [
     },
     handler: UserController.registerHandler,
   },
-  // {
-  //   method: 'GET',
-  //   path: '/users/{id}',
-  //   handler: UserController.getUser,
-  // },
-  // {
-  //   method: 'PUT',
-  //   path: '/users/{id}',
-  //   options: {
-  //     validate: {
-  //       payload: Joi.object({
-  //         username: Joi.string().required(),
-  //         email: Joi.string().required(),
-  //         password: Joi.string().required(),
-  //       }),
-  //     },
-  //   },
-  //   handler: UserController.updateUser,
-  // },
+  {
+    method: 'PUT',
+    path: '/users/{uid}',
+    options: {
+      validate: {
+        payload: Joi.object({
+          uid: Joi.string().required(),
+          address: Joi.array().optional(),
+        }),
+      },
+    },
+    handler: UserController.updateUser,
+  },
+  {
+    method: 'DELETE',
+    path: '/user/{uid}',
+    handler: UserController.deleteUser,
+  }
 ];
 
 module.exports = routes;

@@ -3,7 +3,10 @@ const { initializeApp, cert } = require('firebase-admin/app');
 const serviceAccount = require("./serviceAccountKey.json");
 const Mongoose = require('mongoose');
 const UserRoutes = require('./routes/UserRoutes');
+const PetRoutes = require('./routes/PetRoutes');
+
 const AdminRoutes = require('./routes/AdminRoutes');
+const SpvRoutes = require('./routes/SpvRoutes');
 
 const init = async () => {
     const server = Hapi.server({
@@ -33,7 +36,10 @@ const init = async () => {
     });
 
     server.route(UserRoutes);
-    // server.route(AdminRoutes);
+    server.route(PetRoutes);
+
+    server.route(AdminRoutes);
+    server.route(SpvRoutes);
 
     await server.start();
     console.log('Server running on %s', server.info.uri);
