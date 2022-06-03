@@ -4,6 +4,7 @@ const { getAuth } = require('firebase-admin');
 
 exports.addPetHandler = async (request, h) => {
     try {
+        // const { uidPet, type, gender, age, address,name,desc } = request.payload;
         const { uidPet, type, gender, age, address } = request.payload;
         const pet = await PetModel.findOne({uidPet}).exec();
         
@@ -16,6 +17,7 @@ exports.addPetHandler = async (request, h) => {
                 address,
                 role: 'pet'
             }
+            // name,desc
 
             const account = await PetModel.create(newPet);
 

@@ -10,5 +10,7 @@ const PetSchema = new Schema({
     address: Array,
     role: String,
 });
+// name: String,
+// desc: String,
 
 module.exports = Mongoose.model('pet', PetSchema);
