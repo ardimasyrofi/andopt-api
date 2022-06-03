@@ -8,7 +8,7 @@ const routes = [
     options: {
       validate: {
         payload: Joi.object({
-          uid: Joi.string().required(),
+          uidPet: Joi.string().required(),
           type: Joi.string().optional(),
           gender: Joi.string().optional(),
           age: Joi.number().optional(),
@@ -20,17 +20,17 @@ const routes = [
   },
   {
     method: 'GET',
-    path: '/user/pet/{uid}',
+    path: '/user/pet/{uidPet}',
     handler: PetController.getPet,
   },
   {
     method: 'GET',
-    path: '/user/pet',
+    path: '/user/pets',
     handler: PetController.getAllPets,
   },
   {
     method: 'DELETE',
-    path: '/user/pet/{uid}',
+    path: '/user/pet/{uidPet}',
     handler: PetController.deletePet,
   },
 ];

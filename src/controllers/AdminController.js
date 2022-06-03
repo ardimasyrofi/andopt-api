@@ -4,12 +4,12 @@ const { getAuth } = require('firebase-admin');
 // -----------------> GET : DATA USER -----------------> //
 exports.getAllUsers = async (request, h) => {
     // Tambahan to other
-    let user = null;
+    let admin = null;
     try {
         const {'x-firebase-token': token} = request.headers;
         const decodedToken = await getAuth().verifyIdToken(token);
         const { uid } = decodedToken;
-        user = await UserModel.findOne({uid}).exec();
+        admin = await AdminModel.findOne({uid}).exec();
     } catch (error) {
         const response = h.response({
             status: 'fail',
@@ -40,12 +40,12 @@ exports.getAllUsers = async (request, h) => {
 };
 
 exports.getUser = async(request, h) => {
-    let user = null;
+    let admin = null;
     try {
         const {'x-firebase-token': token} = request.headers;
         const decodedToken = await getAuth().verifyIdToken(token);
         const { uid } = decodedToken;
-        user = await UserModel.findOne({uid}).exec();
+        admin = await AdminModel.findOne({uid}).exec();
     } catch (error) {
         const response = h.response({
             status: 'fail',
@@ -55,15 +55,15 @@ exports.getUser = async(request, h) => {
         return response;
     }
 
-    // const users = await UserModel.findOne({uid: request.params.uid});
-    // return h.response(users);
+    // const user = await UserModel.findOne({uid: request.params.uid});
+    // return h.response(user);
 
     try {
         // const {role} = request.payload;
         if(user.role === 'admin') {
         // if(role === 'admin') {
-            const users = await UserModel.findOne({uid: request.params.uid});
-            return h.response(users);
+            const user = await UserModel.findOne({uid: request.params.uid});
+            return h.response(user);
         }
     } catch (error) {
         const response = h.response({

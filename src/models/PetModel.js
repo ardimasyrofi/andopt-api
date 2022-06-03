@@ -3,7 +3,7 @@ const Mongoose = require('mongoose');
 const { Schema } = Mongoose;
 
 const PetSchema = new Schema({
-    uid: String,
+    uidPet: String,
     type: String,
     gender: String,
     age: Number,

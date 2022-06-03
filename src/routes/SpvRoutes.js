@@ -13,7 +13,7 @@ const routes = [
       },
     },
     handler: SpvController.registerAdminHandler,
-  },
+  }
 ];
 
 module.exports = routes;
