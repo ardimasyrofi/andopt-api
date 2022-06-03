@@ -1,5 +1,6 @@
 const UserModel = require('../models/UserModel');
 const { getAuth } = require('firebase-admin');
+const {nanoid} = require('nanoid');
 
 const validateUid = async (uid, id = null) => {
     let user = null;
@@ -55,53 +56,65 @@ exports.registerHandler = async (request, h) => {
     }
 };
 
-// FAILED
-exports.updateUser = async(request, h) => {
-    // Tambahan to other
-    // let user = null;
-    // try {
-    //     const {'x-firebase-token': token} = request.headers;
-    //     const decodedToken = await getAuth().verifyIdToken(token);
-    //     const { uid } = decodedToken;
-    //     user = await UserModel.findOne({uid}).exec();
-    //     console.log(user)
-    // } catch (error) {
-    //     const response = h.response({
-    //         status: 'fail',
-    //         message: 'Invalid Token!'
-    //     }).code(400);
-
-    //     return response;
-    // }
-
+exports.addAddress = async(request, h) => {
     try {
-        const { uid, address } = request.payload;
+        const { street, city, province } = request.payload;
+        const id = nanoid(16);
         
-        const lowerUid = uid.toLowerCase();
-        const validationUid = await validateUid(lowerUid, request.params.uid);
-
-        const user = {
-            uid: lowerUid,
-            address: address,
-            role: 'user'
+        const address = {
+            id,
+            street,
+            city,
+            province
         }
-
-        await UserModel.updateOne({uid: request.params.uid}, {$set: user});
+        
+        await UserModel.updateOne({uid: request.params.uid}, {$push: {address: address}});
         const updatedUser = await UserModel.findOne({uid: request.params.uid}).exec();
         
-        if(!updatedUser) {
+        if(updatedUser) {
             const response = h.response({
                 status: 'success',
-                message: 'Data was updated!',
-                data: updatedUser
+                message: 'Address was added!',
+                data: updatedUser.address
             }).code(201);
             
             return response;
         } else {
             const response = h.response({
                 status: 'fail',
-                message: 'User already exists!'
-            }).code(400);
+                message: 'User not found!'
+            }).code(404);
+
+            return response;
+        }
+    } catch(error) {
+        const response = h.response({
+            status: 'fail',
+            message: 'Server Error!'
+        }).code(500);
+
+        return response;
+    }
+}
+
+exports.deleteAddress = async(request, h) => {
+    try {
+        await UserModel.updateOne({uid: request.params.uid}, {$pull: {address: {id: request.params.id}}});
+        const updatedUser = await UserModel.findOne({uid: request.params.uid}).exec();
+        
+        if(updatedUser) {
+            const response = h.response({
+                status: 'success',
+                message: 'Address was deleted!',
+                data: updatedUser.address
+            }).code(200);
+            
+            return response;
+        } else {
+            const response = h.response({
+                status: 'fail',
+                message: 'User not found!'
+            }).code(404);
 
             return response;
         }
@@ -114,6 +127,48 @@ exports.updateUser = async(request, h) => {
         return response;
     }
 };
+
+exports.updateAddress = async(request, h) => {
+    try {
+        const { street, city, province } = request.payload;
+        
+        const {id, uid} = request.params;
+
+        const address = {
+            id,
+            street,
+            city,
+            province
+        }
+        
+        await UserModel.updateOne({uid: uid, 'address.id': id}, {$set: {'address.$': address}});
+        const updatedUser = await UserModel.findOne({uid: request.params.uid}).exec();
+        
+        if(updatedUser) {
+            const response = h.response({
+                status: 'success',
+                message: 'Address was updated!',
+                data: updatedUser.address
+            }).code(200);
+            
+            return response;
+        } else {
+            const response = h.response({
+                status: 'fail',
+                message: 'User not found!'
+            }).code(404);
+
+            return response;
+        }
+    } catch(error) {
+        const response = h.response({
+            status: 'fail',
+            message: 'Server Error!'
+        }).code(500);
+
+        return response;
+    }
+}
 
 exports.deleteUser = async(request, h) => {
     let user = null;

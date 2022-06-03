@@ -16,17 +16,37 @@ const routes = [
     handler: UserController.registerHandler,
   },
   {
-    method: 'PUT',
-    path: '/users/{uid}',
+    method: 'POST',
+    path: '/user/address/{uid}',
     options: {
       validate: {
         payload: Joi.object({
-          uid: Joi.string().required(),
-          address: Joi.array().optional(),
+          street: Joi.string().required(),
+          city: Joi.string().required(),
+          province: Joi.string().required(),
         }),
       },
     },
-    handler: UserController.updateUser,
+    handler: UserController.addAddress,
+  },
+  {
+    method: 'PUT',
+    path: '/user/address/{uid}/{id}',
+    options: {
+      validate: {
+        payload: Joi.object({
+          street: Joi.string().optional(),
+          city: Joi.string().optional(),
+          province: Joi.string().optional(),
+        }),
+      },
+    },
+    handler: UserController.updateAddress,
+  },
+  {
+    method: 'DELETE',
+    path: '/user/address/{uid}/{id}',
+    handler: UserController.deleteAddress,
   },
   {
     method: 'DELETE',

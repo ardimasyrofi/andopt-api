@@ -2,7 +2,7 @@ const PetModel = require('../models/PetModel');
 const UserModel = require('../models/UserModel');
 const { getAuth } = require('firebase-admin');
 
-exports.registerPetHandler = async (request, h) => {
+exports.addPetHandler = async (request, h) => {
     try {
         const { uidPet, type, gender, age, address } = request.payload;
         const pet = await PetModel.findOne({uidPet}).exec();
@@ -160,3 +160,46 @@ exports.deletePet = async(request, h) => {
         return response;
     }
 };
+
+exports.updatePet = async(request, h) => {
+    let user = null;
+    try {
+        const {'x-firebase-token': token} = request.headers;
+        const decodedToken = await getAuth().verifyIdToken(token);
+        const { uid } = decodedToken;
+        user = await UserModel.findOne({uid}).exec();
+    } catch (error) {
+        const response = h.response({
+            status: 'fail',
+            message: 'Invalid Token!'
+        }).code(400);
+
+        return response;
+    }
+
+    // await PetModel.updateOne({uidPet: request.params.uidPet}, {$set: request.payload});
+    // const response = h.response({
+    //     status: 'success',
+    //     message: 'Data Pet was updated!',
+    // }).code(200);
+
+    // return response;
+
+    try {
+        await PetModel.updateOne({uidPet: request.params.uidPet}, {$set: request.payload});
+        
+        const response = h.response({
+            status: 'success',
+            message: 'Data Pet was updated!',
+        }).code(200);
+        
+        return response;
+    } catch(error) {
+        const response = h.response({
+            status: 'fail',
+            message: 'Error!'
+        }).code(400);
+
+        return response;
+    }
+}
