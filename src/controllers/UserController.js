@@ -4,10 +4,10 @@ const verifyUser = require('../middlewares/verifyUser');
 exports.createUser = async (request, h) => {
     const { uid } = request.payload;
     const newUser = {
-        address : [],
+        lastseen: [],
         role: 'user',
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
     }
 
     const { db } = request.server.app.firestore;
@@ -33,20 +33,16 @@ exports.createUser = async (request, h) => {
     }
 };
 
-exports.addAddress = async(request, h) => {
+exports.addLastseen = async(request, h) => {
     verifyUser(request, h);
     
-    const { street, city, province } = request.payload;
+    const { pet_id } = request.payload;
     const { uid } = request.params;
     const id = nanoid(16);
 
-    const address = {
+    const lastseen = {
         id,
-        street,
-        city,
-        province,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        pet_id,
     }
 
     const { db, FieldValue } = request.server.app.firestore;
@@ -54,15 +50,15 @@ exports.addAddress = async(request, h) => {
 
     try {
         await db.collection('users').doc(uid).update({
-            address: FieldValue.arrayUnion(address)
+            lastseen: FieldValue.arrayUnion(lastseen)
         });
         
         const response = h.response({
             status: 'success',
-            message: 'Address was added!',
+            message: 'Lastseen was added!',
             data: {
                 uid,
-                address,
+                lastseen,
             }
         }).code(201);
         return response;
@@ -71,50 +67,7 @@ exports.addAddress = async(request, h) => {
     }
 }
 
-exports.updateAddress = async(request, h) => {
-    verifyUser(request, h);
-
-    const { uid, id } = request.params;
-    const { street, city, province } = request.payload;
-    const { db, FieldValue } = request.server.app.firestore;
-    const { boom } = request.server.app;
-
-    try {
-        const user = await db.collection('users').doc(uid).get();
-
-        if (!user.exists) {    
-            return boom.notFound(`User id ${uid} not found`);
-        } 
-        const address = user.data().address.find(address => address.id === id);
-        await db.collection('users').doc(uid).update({
-            address: FieldValue.arrayUnion({
-                id,
-                street,
-                city,
-                province,
-                createdAt: address.createdAt,
-                updatedAt: new Date(),
-            })
-        });
-        await db.collection('users').doc(uid).update({
-            address: FieldValue.arrayRemove(address)
-        });
-
-        const response = h.response({
-            status: 'success',
-            message: 'Address was updated!',
-            data: {
-                uid,
-                address,
-            }
-        }).code(200);
-        return response;
-    } catch (error) {
-        return boom.badImplementation();
-    }
-}
-
-exports.deleteAddress = async(request, h) => {
+exports.deleteLastseen = async(request, h) => {
     verifyUser(request, h);
 
     const { uid, id } = request.params;
@@ -126,19 +79,19 @@ exports.deleteAddress = async(request, h) => {
         if (!user.exists) {    
             return boom.notFound(`User id ${uid} not found`);
         } 
-        const address = user.data().address.find(address => address.id === id);
+        const lastseen = user.data().lastseen.find(lastseen => lastseen.id === id);
         await db.collection('users').doc(uid).update({
-            address: FieldValue.arrayRemove(address)
+            lastseen: FieldValue.arrayRemove(lastseen)
         });
 
         const response = h.response({
             status: 'success',
-            message: 'Address was deleted!',
+            message: 'Lastseen was deleted!',
         }).code(200);
         return response;
     } catch (error) {
         if (error.message.includes('undefined')) {
-            return boom.badRequest('Address not found!');
+            return boom.badRequest('Lastseen not found!');
         }
         return boom.badImplementation();
     }

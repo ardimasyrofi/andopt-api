@@ -4,51 +4,55 @@ const PetController = require('../controllers/PetController');
 const routes = [
   {
     method: 'POST',
-    path: '/user/pet',
+    path: '/user/{uid}/pet',
     options: {
       validate: {
         payload: Joi.object({
-          uidPet: Joi.string().required(),
-          type: Joi.string().optional(),
-          gender: Joi.string().optional(),
-          age: Joi.number().optional(),
-          address: Joi.array().optional(),
+          name: Joi.string().required(),
+          imageUrl: Joi.string().required(),
+          age: Joi.string().required(),
+          gender: Joi.string().required(),
+          type: Joi.object().required(),
+          location: Joi.string().required(),
+          description: Joi.string().optional()
         }),
       },
     },
-    handler: PetController.addPetHandler,
+    handler: PetController.createPet,
   },
   {
     method: 'GET',
-    path: '/user/pet/{uidPet}',
+    path: '/pet/{id}',
     handler: PetController.getPet,
   },
   {
     method: 'GET',
-    path: '/user/pets/{uid}',
+    path: '/pets',
     handler: PetController.getAllPets,
   },
   {
-    method: 'DELETE',
-    path: '/user/pet/{uidPet}',
-    handler: PetController.deletePet,
-  },
-  {
     method: 'PUT',
-    path: '/user/pet/{uidPet}',
+    path: '/user/{uid}/pet/{id}',
     options: {
       validate: {
         payload: Joi.object({
-          uidPet: Joi.string().required(),
-          type: Joi.string().optional(),
-          gender: Joi.string().optional(),
-          age: Joi.number().optional(),
-          address: Joi.array().optional(),
+          name: Joi.string().required(),
+          imageUrl: Joi.string().required(),
+          age: Joi.string().required(),
+          gender: Joi.string().required(),
+          type: Joi.object().required(),
+          location: Joi.string().required(),
+          description: Joi.string().optional()
         }),
       },
     },
     handler: PetController.updatePet,
   },
+  {
+    method: 'DELETE',
+    path: '/user/{uid}/pet/{id}',
+    handler: PetController.deletePet,
+  }, 
 ];
 
 module.exports = routes;
