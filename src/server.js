@@ -1,12 +1,8 @@
 const Hapi = require('@hapi/hapi');
-const { initializeApp, cert } = require('firebase-admin/app');
-const serviceAccount = require("./serviceAccountKey.json");
+const boom = require('@hapi/boom');
+const routes = require('./routes');
 const Mongoose = require('mongoose');
-const UserRoutes = require('./routes/UserRoutes');
-const PetRoutes = require('./routes/PetRoutes');
-
-const AdminRoutes = require('./routes/AdminRoutes');
-const SpvRoutes = require('./routes/SpvRoutes');
+const firebase = require('./services/firebase');
 
 const init = async () => {
     const server = Hapi.server({
@@ -19,10 +15,9 @@ const init = async () => {
         }
     });
 
-    initializeApp({
-        credential: cert(serviceAccount),
-    });
-
+    const { firestore } = await firebase.init();
+    server.app.firestore = firestore;
+    server.app.boom = boom;
 
     Mongoose.connect("mongodb+srv://mv4:0987poiu@andopt-app-maviav1.tmpnc.mongodb.net/andopt-api",{ 
         useNewUrlParser: true,
@@ -35,11 +30,7 @@ const init = async () => {
         console.log('Connected to MongoDB');
     });
 
-    server.route(UserRoutes);
-    server.route(PetRoutes);
-
-    server.route(AdminRoutes);
-    server.route(SpvRoutes);
+    await server.register(routes);
 
     await server.start();
     console.log('Server running on %s', server.info.uri);

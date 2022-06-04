@@ -9,15 +9,14 @@ const routes = [
       validate: {
         payload: Joi.object({
           uid: Joi.string().required(),
-          address: Joi.array().optional(),
         }),
       },
     },
-    handler: UserController.registerHandler,
+    handler: UserController.createUser,
   },
   {
     method: 'POST',
-    path: '/user/address/{uid}',
+    path: '/user/{uid}/address',
     options: {
       validate: {
         payload: Joi.object({
@@ -31,13 +30,13 @@ const routes = [
   },
   {
     method: 'PUT',
-    path: '/user/address/{uid}/{id}',
+    path: '/user/{uid}/address/{id}',
     options: {
       validate: {
         payload: Joi.object({
-          street: Joi.string().optional(),
-          city: Joi.string().optional(),
-          province: Joi.string().optional(),
+          street: Joi.string().required(),
+          city: Joi.string().required(),
+          province: Joi.string().required(),
         }),
       },
     },
@@ -45,14 +44,9 @@ const routes = [
   },
   {
     method: 'DELETE',
-    path: '/user/address/{uid}/{id}',
+    path: '/user/{uid}/address/{id}',
     handler: UserController.deleteAddress,
   },
-  {
-    method: 'DELETE',
-    path: '/user/{uid}',
-    handler: UserController.deleteUser,
-  }
 ];
 
 module.exports = routes;
