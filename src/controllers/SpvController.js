@@ -6,7 +6,6 @@ exports.createAdmin = async (request, h) => {
 
     const { uid } = request.payload;
     const newUser = {
-        address : [],
         role: 'admin',
         createdAt: new Date(),
         updatedAt: new Date()

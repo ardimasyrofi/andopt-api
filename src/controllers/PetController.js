@@ -1,207 +1,136 @@
-const PetModel = require('../models/PetModel');
-const UserModel = require('../models/UserModel');
-const { getAuth } = require('firebase-admin');
+const verifyUser = require('../middlewares/verifyUser');
 
-exports.addPetHandler = async (request, h) => {
+exports.createPet = async (request, h) => {
+    verifyUser(request, h);
+
+    const { uid } = request.params;
+    const { name, imageUrl, age, gender, type, location, description } = request.payload;
+    const newPet = {
+        user_uid: uid,
+        name,
+        imageUrl,
+        age,
+        gender,
+        type,
+        location,
+        description: description || "",
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
     try {
-        // const { uidPet, type, gender, age, address,name,desc } = request.payload;
-        const { uidPet, type, gender, age, address } = request.payload;
-        const pet = await PetModel.findOne({uidPet}).exec();
-        
-        if(!pet) {
-            const newPet = {
-                uidPet,
-                type,
-                gender, 
-                age,
-                address,
-                role: 'pet'
+        const pet = await db.collection('pets').add(newPet);
+
+        const response = h.response({
+            status: 'success',
+            message: 'Pet created successfully',
+            data: {
+                user_uid: uid,
+                id: pet.id,
+                createdAt: newPet.createdAt,
             }
-            // name,desc
-
-            const account = await PetModel.create(newPet);
-
-            const response = h.response({
-                status: 'success',
-                message: 'Data was added!',
-                data: account
-            }).code(201);
-            
-            return response;
-        } else {
-            const response = h.response({
-                status: 'fail',
-                message: 'Pet already exists!'
-            }).code(400);
-
-            return response;
-        }
-    } catch(error) {
-        const response = h.response({
-            status: 'fail',
-            message: 'Server Error!'
-        }).code(500);
-
+        }).code(201);
         return response;
-    }
-};
-
-exports.getAllPets = async (request, h) => {
-    // Tambahan to other
-    let user = null;
-    try {
-        const {'x-firebase-token': token} = request.headers;
-        const decodedToken = await getAuth().verifyIdToken(token);
-        const { uid } = decodedToken;
-        user = await UserModel.findOne({uid}).exec();
     } catch (error) {
-        const response = h.response({
-            status: 'fail',
-            message: 'Invalid Token!'
-        }).code(400);
-
-        return response;
-    }
-
-    // const pets = await PetModel.find();
-    // return h.response(pets);
-    
-    try {
-        // const {role} = request.payload;
-        if(user.role === 'user') {
-        // if(role === 'admin') {
-            const pets = await PetModel.find();
-            return h.response(pets);
-        }
-    } catch (error) {
-        const response = h.response({
-            status: 'fail',
-            message: 'Server Error!'
-        }).code(500);
-
+        const response = boom.badRequest(error);
         return response;
     }
 };
 
 exports.getPet = async(request, h) => {
-    let user = null;
-    try {
-        const {'x-firebase-token': token} = request.headers;
-        const decodedToken = await getAuth().verifyIdToken(token);
-        const { uid } = decodedToken;
-        user = await UserModel.findOne({uid}).exec();
-    } catch (error) {
-        const response = h.response({
-            status: 'fail',
-            message: 'Invalid Token!'
-        }).code(400);
+    const { id } = request.params;
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
 
+    try {
+        const pet = await db.collection('pets').doc(id).get();
+        const response = h.response({
+            status: 'success',
+            message: 'Pet data retrieved successfully',
+            data: pet.data()
+        }).code(200);
         return response;
-    }
-
-    // const pet = await PetModel.findOne({uidPet: request.params.uidPet});
-    // return h.response(pet);
-
-    try {
-        // const {role} = request.payload;
-        if(user.role === 'user') {
-        // if(role === 'admin') {
-            const pet = await PetModel.findOne({uidPet: request.params.uidPet});
-            return h.response(pet);
-        }
     } catch (error) {
-        const response = h.response({
-            status: 'fail',
-            message: 'Server Error!'
-        }).code(500);
-
+        const response = boom.badRequest(error);
         return response;
     }
 };
 
-exports.deletePet = async(request, h) => {
-    let user = null;
-    try {
-        const {'x-firebase-token': token} = request.headers;
-        const decodedToken = await getAuth().verifyIdToken(token);
-        const { uid } = decodedToken;
-        user = await UserModel.findOne({uid}).exec();
-    } catch (error) {
-        const response = h.response({
-            status: 'fail',
-            message: 'Invalid Token!'
-        }).code(400);
-
-        return response;
-    }
-
-    // await PetModel.deleteOne({uidPet: request.params.uidPet}, {$set: request.payload});
-        
-    // const response = h.response({
-    //     status: 'success',
-    //     message: 'Data was deleted!',
-    // }).code(200);
-
-    // return response;
+exports.getAllPets = async (request, h) => {
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
 
     try {
-        await PetModel.deleteOne({uidPet: request.params.uidPet}, {$set: request.payload});
-        
+        const pets = await db.collection('pets').get();
         const response = h.response({
             status: 'success',
-            message: 'Data was deleted!',
+            message: 'All pets retrieved successfully',
+            data: pets.docs.map(doc => doc.data())
         }).code(200);
-        
         return response;
-    } catch(error) {
-        const response = h.response({
-            status: 'fail',
-            message: 'Error!'
-        }).code(400);
-
+    } catch (error) {
+        const response = boom.badRequest(error);
         return response;
     }
 };
 
 exports.updatePet = async(request, h) => {
-    let user = null;
-    try {
-        const {'x-firebase-token': token} = request.headers;
-        const decodedToken = await getAuth().verifyIdToken(token);
-        const { uid } = decodedToken;
-        user = await UserModel.findOne({uid}).exec();
-    } catch (error) {
-        const response = h.response({
-            status: 'fail',
-            message: 'Invalid Token!'
-        }).code(400);
+    verifyUser(request, h);
 
-        return response;
+    const { id } = request.params;
+    const { name, imageUrl, age, gender, type, location, description } = request.payload;
+    const updatedPet = {
+        name,
+        imageUrl,
+        age,
+        gender,
+        type,
+        location,
+        description,
+        updatedAt: new Date(),
     }
-
-    // await PetModel.updateOne({uidPet: request.params.uidPet}, {$set: request.payload});
-    // const response = h.response({
-    //     status: 'success',
-    //     message: 'Data Pet was updated!',
-    // }).code(200);
-
-    // return response;
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
 
     try {
-        await PetModel.updateOne({uidPet: request.params.uidPet}, {$set: request.payload});
-        
+        await db.collection('pets').doc(id).update(updatedPet);
+
         const response = h.response({
             status: 'success',
-            message: 'Data Pet was updated!',
+            message: 'Pet updated successfully',
+            data: {
+                id,
+                updatedAt: new Date(),
+            }
         }).code(200);
-        
         return response;
-    } catch(error) {
-        const response = h.response({
-            status: 'fail',
-            message: 'Error!'
-        }).code(400);
-
+    } catch (error) {
+        const response = boom.badRequest(error);
         return response;
     }
 }
+
+exports.deletePet = async(request, h) => {
+    verifyUser(request, h);
+
+    const { id } = request.params;
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
+    try {
+        await db.collection('pets').doc(id).delete();
+
+        const response = h.response({
+            status: 'success',
+            message: 'Pet deleted successfully',
+        }).code(200);
+        return response;
+    } catch (error) {
+        const response = boom.badRequest(error);
+        return response;
+    }
+};
+

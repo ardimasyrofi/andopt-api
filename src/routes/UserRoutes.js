@@ -16,7 +16,7 @@ const routes = [
   },
   {
     method: 'POST',
-    path: '/user/{uid}/address',
+    path: '/user/{uid}/lastseen',
     options: {
       validate: {
         payload: Joi.object({
@@ -26,26 +26,12 @@ const routes = [
         }),
       },
     },
-    handler: UserController.addAddress,
-  },
-  {
-    method: 'PUT',
-    path: '/user/{uid}/address/{id}',
-    options: {
-      validate: {
-        payload: Joi.object({
-          street: Joi.string().required(),
-          city: Joi.string().required(),
-          province: Joi.string().required(),
-        }),
-      },
-    },
-    handler: UserController.updateAddress,
+    handler: UserController.addLastseen,
   },
   {
     method: 'DELETE',
-    path: '/user/{uid}/address/{id}',
-    handler: UserController.deleteAddress,
+    path: '/user/{uid}/lastseen/{id}',
+    handler: UserController.deleteLastseen,
   },
 ];
 

@@ -1,11 +1,17 @@
 const verifyUser = async (request, h) => {
-    let user = null;
     const { db, getAuth } = request.server.app.firestore;
     const { boom } = request.server.app;
+    const {'x-firebase-token': token} = request.headers;
+    
+    let user = null;
     try {
-        const {'x-firebase-token': token} = request.headers;
         const decodedToken = await getAuth().verifyIdToken(token);
         const { uid } = decodedToken;
+
+        if (uid !== request.params.uid) {
+            return boom.unauthorized('User is not authorized to perform this action');
+        }
+
         user = await db.collection('users').doc(uid).get();
 
         if (!user.exists) {    
