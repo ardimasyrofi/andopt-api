@@ -1,55 +1,148 @@
-const UserModel = require('../models/UserModel');
+const { nanoid } = require('nanoid');
+const verifyUser = require('../middlewares/verifyUser');
 
-const validateUsername = async (username) => {
-    const user = await UserModel.findOne({ username });
-    if (user) {
-        return false;
+exports.createUser = async (request, h) => {
+    const { uid } = request.payload;
+    const newUser = {
+        address : [],
+        role: 'user',
+        createdAt: new Date(),
+        updatedAt: new Date()
     }
-    return true;
+
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
+    try {
+        await db.collection('users').doc(uid).set(newUser);
+        
+        const response = h.response({
+            status: 'success',
+            message: 'User created successfully',
+            data: {
+                uid,
+                createdAt: newUser.createdAt,
+            }
+        }).code(201);
+        return response;
+    } catch (error) {
+        if (error.message.includes('ALREADY_EXISTS')) {
+            return boom.conflict(`User id ${uid} already exists`);
+        }
+        return boom.badImplementation();
+    }
 };
 
-const validateEmail = async (email) => {
-    const user = await UserModel.findOne({ email });
-    if (user) {
-        return false;
-    }
-    return true;
-};
-
-exports.addUser = async (request, h) => {
-    const user = new UserModel(request.payload);
-    const validationUsername = await validateUsername(user.username);
-    const validationEmail = await validateEmail(user.email);
-
-    if (!validationUsername || !validationEmail) {
-        if (!validationUsername) {
-            return h.response({
-                message: 'Username already exists',
-            }).code(400);
-        }
-        else if (!validationEmail) {
-            return h.response({
-                message: 'Email already exists',
-            }).code(400);
-        }
-    }
+exports.addAddress = async(request, h) => {
+    verifyUser(request, h);
     
-    await user.save();
-    return h.response(user).code(201);
+    const { street, city, province } = request.payload;
+    const { uid } = request.params;
+    const id = nanoid(16);
+
+    const address = {
+        id,
+        street,
+        city,
+        province,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    }
+
+    const { db, FieldValue } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
+    try {
+        await db.collection('users').doc(uid).update({
+            address: FieldValue.arrayUnion(address)
+        });
+        
+        const response = h.response({
+            status: 'success',
+            message: 'Address was added!',
+            data: {
+                uid,
+                address,
+            }
+        }).code(201);
+        return response;
+    } catch (error) {
+        return boom.badImplementation();
+    }
+}
+
+exports.updateAddress = async(request, h) => {
+    verifyUser(request, h);
+
+    const { uid, id } = request.params;
+    const { street, city, province } = request.payload;
+    const { db, FieldValue } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
+    try {
+        const user = await db.collection('users').doc(uid).get();
+
+        if (!user.exists) {    
+            return boom.notFound(`User id ${uid} not found`);
+        } 
+        const address = user.data().address.find(address => address.id === id);
+        await db.collection('users').doc(uid).update({
+            address: FieldValue.arrayUnion({
+                id,
+                street,
+                city,
+                province,
+                createdAt: address.createdAt,
+                updatedAt: new Date(),
+            })
+        });
+        await db.collection('users').doc(uid).update({
+            address: FieldValue.arrayRemove(address)
+        });
+
+        const response = h.response({
+            status: 'success',
+            message: 'Address was updated!',
+            data: {
+                uid,
+                address,
+            }
+        }).code(200);
+        return response;
+    } catch (error) {
+        return boom.badImplementation();
+    }
+}
+
+exports.deleteAddress = async(request, h) => {
+    verifyUser(request, h);
+
+    const { uid, id } = request.params;
+    const { db, FieldValue } = request.server.app.firestore;
+    const { boom } = request.server.app;
+    try {
+        const user = await db.collection('users').doc(uid).get();
+
+        if (!user.exists) {    
+            return boom.notFound(`User id ${uid} not found`);
+        } 
+        const address = user.data().address.find(address => address.id === id);
+        await db.collection('users').doc(uid).update({
+            address: FieldValue.arrayRemove(address)
+        });
+
+        const response = h.response({
+            status: 'success',
+            message: 'Address was deleted!',
+        }).code(200);
+        return response;
+    } catch (error) {
+        if (error.message.includes('undefined')) {
+            return boom.badRequest('Address not found!');
+        }
+        return boom.badImplementation();
+    }
 };
 
-exports.getAllUsers = async (request, h) => {
-    const users = await UserModel.find();
-    return h.response(users);
-};
 
-exports.getUser = async(request, h) => {
-    const user = await UserModel.find({_id: request.params.id}).exec();
 
-    const response = h.response({
-        status: 'success',
-        message: 'test',
-        data: user
-    }).code(200);
-    return response;
-};

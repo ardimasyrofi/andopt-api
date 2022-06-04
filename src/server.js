@@ -1,12 +1,23 @@
 const Hapi = require('@hapi/hapi');
-const Mongoose = require('mongoose');
+const boom = require('@hapi/boom');
 const routes = require('./routes');
+const Mongoose = require('mongoose');
+const firebase = require('./services/firebase');
 
 const init = async () => {
     const server = Hapi.server({
-        port: 3000,
-        host: 'localhost'
+        port: 4000,
+        host: 'localhost',
+        routes: {
+            cors: {
+            origin: ['*']
+            }
+        }
     });
+
+    const { firestore } = await firebase.init();
+    server.app.firestore = firestore;
+    server.app.boom = boom;
 
     Mongoose.connect("mongodb+srv://mv4:0987poiu@andopt-app-maviav1.tmpnc.mongodb.net/andopt-api",{ 
         useNewUrlParser: true,
@@ -19,7 +30,7 @@ const init = async () => {
         console.log('Connected to MongoDB');
     });
 
-    server.route(routes);
+    await server.register(routes);
 
     await server.start();
     console.log('Server running on %s', server.info.uri);
