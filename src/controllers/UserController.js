@@ -1,181 +1,148 @@
-const UserModel = require('../models/UserModel');
-const { getAuth } = require('firebase-admin');
+const { nanoid } = require('nanoid');
+const verifyUser = require('../middlewares/verifyUser');
 
-// KENDALA :
-// 1. username atau email yg masuk belum sensitive pd huruf kapital
-// 2. data yg sdh diupadted, belum bisa menampilkan data 
+exports.createUser = async (request, h) => {
+    const { uid } = request.payload;
+    const newUser = {
+        address : [],
+        role: 'user',
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
 
-exports.registerHandler = async (request, h) => {
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
     try {
-        const { uid, address } = request.payload;
-        const user = await UserModel.findOne({uid}).exec();
+        await db.collection('users').doc(uid).set(newUser);
         
-        if(!user) {
-            const newUser = {
+        const response = h.response({
+            status: 'success',
+            message: 'User created successfully',
+            data: {
+                uid,
+                createdAt: newUser.createdAt,
+            }
+        }).code(201);
+        return response;
+    } catch (error) {
+        if (error.message.includes('ALREADY_EXISTS')) {
+            return boom.conflict(`User id ${uid} already exists`);
+        }
+        return boom.badImplementation();
+    }
+};
+
+exports.addAddress = async(request, h) => {
+    verifyUser(request, h);
+    
+    const { street, city, province } = request.payload;
+    const { uid } = request.params;
+    const id = nanoid(16);
+
+    const address = {
+        id,
+        street,
+        city,
+        province,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    }
+
+    const { db, FieldValue } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
+    try {
+        await db.collection('users').doc(uid).update({
+            address: FieldValue.arrayUnion(address)
+        });
+        
+        const response = h.response({
+            status: 'success',
+            message: 'Address was added!',
+            data: {
                 uid,
                 address,
-                role: 'user'
             }
-
-            const account = await UserModel.create(newUser);
-
-            const response = h.response({
-                status: 'success',
-                message: 'Data was added!',
-                data: account
-            }).code(201);
-            
-            return response;
-        } else {
-            const response = h.response({
-                status: 'fail',
-                message: 'User already exists!'
-            }).code(400);
-
-            return response;
-        }
-    } catch(error) {
-        const response = h.response({
-            status: 'fail',
-            message: 'Server Error!'
-        }).code(500);
-
+        }).code(201);
         return response;
+    } catch (error) {
+        return boom.badImplementation();
     }
-};
+}
 
-exports.updateUser = async(request, h) => {
+exports.updateAddress = async(request, h) => {
+    verifyUser(request, h);
+
+    const { uid, id } = request.params;
+    const { street, city, province } = request.payload;
+    const { db, FieldValue } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
     try {
-        const checkUser = await UserModel.findOne({_id: request.params.id}).exec();
-        if(!checkUser) {
-            const response = h.response({
-                status: 'fail',
-                message: 'Data not found!'
-            }).code(404);
-            
-            return response;
-        }
-        
-        const { username, email, password} = request.payload;
-        const lowerUsername = username.toLowerCase();
-        const lowerEmail = email.toLowerCase();
-        
-        const validationUsername = await validateUsername(lowerUsername, request.params.id);
-        const validationEmail = await validateEmail(lowerEmail, request.params.id);
+        const user = await db.collection('users').doc(uid).get();
 
-        const user = {
-            username: lowerUsername,
-            email: lowerEmail,
-            password: Bcrypt.hashSync(password, 10)
-        }
+        if (!user.exists) {    
+            return boom.notFound(`User id ${uid} not found`);
+        } 
+        const address = user.data().address.find(address => address.id === id);
+        await db.collection('users').doc(uid).update({
+            address: FieldValue.arrayUnion({
+                id,
+                street,
+                city,
+                province,
+                createdAt: address.createdAt,
+                updatedAt: new Date(),
+            })
+        });
+        await db.collection('users').doc(uid).update({
+            address: FieldValue.arrayRemove(address)
+        });
 
-        if (!validationUsername || !validationEmail) {
-            if (!validationUsername) {
-                const response = h.response({
-                    message: 'Username already exists',
-                }).code(400);
-
-                return response;
-            }
-            else if (!validationEmail) {
-                const response = h.response({
-                    message: 'Email already exists',
-                }).code(400);
-
-                return response
-            }
-        }
-        await UserModel.updateOne({_id: request.params.id}, {$set: user});
-        const updatedUser = await UserModel.findOne({_id: request.params.id}).exec();
-        
         const response = h.response({
             status: 'success',
-            message: 'Data was updated!',
-            data: updatedUser
+            message: 'Address was updated!',
+            data: {
+                uid,
+                address,
+            }
         }).code(200);
-        
         return response;
-    } catch(error) {
-        const response = h.response({
-            status: 'fail',
-            message: 'Error!'
-        }).code(400);
-
-        return response;
+    } catch (error) {
+        return boom.badImplementation();
     }
-};
+}
 
-exports.deleteUser = async(request, h) => {
-    const checkId = await UserModel.find({_id: request.params.id}).exec();
-    console.log(checkId)
-    if(!checkId) {
-        const response = h.response({
-            status: 'fail',
-            message: 'Data not found!'
-        }).code(404);
-        
-        return response;
-    }
-    
+exports.deleteAddress = async(request, h) => {
+    verifyUser(request, h);
+
+    const { uid, id } = request.params;
+    const { db, FieldValue } = request.server.app.firestore;
+    const { boom } = request.server.app;
     try {
-        const deletedUser = await UserModel.deleteOne({_id: request.params.id}, {$set: request.payload});
-        
+        const user = await db.collection('users').doc(uid).get();
+
+        if (!user.exists) {    
+            return boom.notFound(`User id ${uid} not found`);
+        } 
+        const address = user.data().address.find(address => address.id === id);
+        await db.collection('users').doc(uid).update({
+            address: FieldValue.arrayRemove(address)
+        });
+
         const response = h.response({
             status: 'success',
-            message: 'Data was deleted!',
+            message: 'Address was deleted!',
         }).code(200);
-        
         return response;
-    } catch(error) {
-        const response = h.response({
-            status: 'fail',
-            message: 'Error!'
-        }).code(400);
-
-        return response;
-    }
-};
-
-exports.getAllUsers = async (request, h) => {
-    let user = null;
-    try {
-        const {'x-firebase-token': token} = request.headers;
-        const decodedToken = await getAuth().verifyIdToken(token);
-        const { uid } = decodedToken;
-        user = await UserModel.findOne({uid}).exec();
     } catch (error) {
-        const response = h.response({
-            status: 'fail',
-            message: 'Invalid Token!'
-        }).code(400);
-
-        return response;
-    }
-    
-    try {
-        if(user.role === 'admin') {
-            const users = await UserModel.find();
-            return h.response(users);
+        if (error.message.includes('undefined')) {
+            return boom.badRequest('Address not found!');
         }
-    } catch (error) {
-        const response = h.response({
-            status: 'fail',
-            message: 'Server Error!'
-        }).code(500);
-
-        return response;
+        return boom.badImplementation();
     }
 };
 
-exports.getUser = async(request, h) => {
-    const user = await UserModel.find({_id: request.params.id}).exec();
 
-    const response = h.response({
-        status: 'success',
-        message: 'Berhasil!',
-        data: user
-    }).code(200);
-    
-    return response;
-};
 

@@ -9,31 +9,44 @@ const routes = [
       validate: {
         payload: Joi.object({
           uid: Joi.string().required(),
-          address: Joi.array().optional(),
         }),
       },
     },
-    handler: UserController.registerHandler,
+    handler: UserController.createUser,
   },
-  // {
-  //   method: 'GET',
-  //   path: '/users/{id}',
-  //   handler: UserController.getUser,
-  // },
-  // {
-  //   method: 'PUT',
-  //   path: '/users/{id}',
-  //   options: {
-  //     validate: {
-  //       payload: Joi.object({
-  //         username: Joi.string().required(),
-  //         email: Joi.string().required(),
-  //         password: Joi.string().required(),
-  //       }),
-  //     },
-  //   },
-  //   handler: UserController.updateUser,
-  // },
+  {
+    method: 'POST',
+    path: '/user/{uid}/address',
+    options: {
+      validate: {
+        payload: Joi.object({
+          street: Joi.string().required(),
+          city: Joi.string().required(),
+          province: Joi.string().required(),
+        }),
+      },
+    },
+    handler: UserController.addAddress,
+  },
+  {
+    method: 'PUT',
+    path: '/user/{uid}/address/{id}',
+    options: {
+      validate: {
+        payload: Joi.object({
+          street: Joi.string().required(),
+          city: Joi.string().required(),
+          province: Joi.string().required(),
+        }),
+      },
+    },
+    handler: UserController.updateAddress,
+  },
+  {
+    method: 'DELETE',
+    path: '/user/{uid}/address/{id}',
+    handler: UserController.deleteAddress,
+  },
 ];
 
 module.exports = routes;
