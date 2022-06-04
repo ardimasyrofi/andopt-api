@@ -4,7 +4,7 @@ const SpvController = require('../controllers/SpvController');
 const routes = [
   {
     method: 'POST',
-    path: '/spv/registerAdmin',
+    path: '/admin/register',
     options: {
       validate: {
         payload: Joi.object({
@@ -12,7 +12,7 @@ const routes = [
         }),
       },
     },
-    handler: SpvController.registerAdminHandler,
+    handler: SpvController.createAdmin,
   }
 ];
 

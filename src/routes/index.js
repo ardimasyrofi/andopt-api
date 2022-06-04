@@ -1,7 +1,9 @@
 const UserRoutes = require('./UserRoutes');
+const SpvRoutes = require('./SpvRoutes');
 
 const routes = [
     UserRoutes,
+    SpvRoutes,
 ];
 
 const bundledRoutes = (() => ({

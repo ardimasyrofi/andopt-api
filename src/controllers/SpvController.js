@@ -1,41 +1,36 @@
-const UserModel = require('../models/UserModel');
-const { getAuth } = require('firebase-admin');
+exports.createAdmin = async (request, h) => {
+    const user = verifyUser(request, h);
+    if (user.data().role !== 'spv') {
+        return boom.unauthorized('You are not authorized to perform this action');
+    }
 
-// -----------------> POST : ADMIN -----------------> //
-exports.registerAdminHandler = async (request, h) => {
+    const { uid } = request.payload;
+    const newUser = {
+        address : [],
+        role: 'admin',
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
     try {
-        const { uid } = request.payload;
-        const admin = await UserModel.findOne({uid}).exec();
+        await db.collection('users').doc(uid).set(newUser);
         
-        if(!admin) {
-            const newAdmin = {
-                uid,
-                role: 'admin'
-            }
-
-            const account = await UserModel.create(newAdmin);
-
-            const response = h.response({
-                status: 'success',
-                message: 'Data was added!',
-                data: account
-            }).code(201);
-            
-            return response;
-        } else {
-            const response = h.response({
-                status: 'fail',
-                message: 'User already exists!'
-            }).code(400);
-
-            return response;
-        }
-    } catch(error) {
         const response = h.response({
-            status: 'fail',
-            message: 'Server Error!'
-        }).code(500);
-
+            status: 'success',
+            message: 'Admin created successfully',
+            data: {
+                uid,
+                createdAt: newUser.createdAt,
+            }
+        }).code(201);
         return response;
+    } catch (error) {
+        if (error.message.includes('ALREADY_EXISTS')) {
+            return boom.conflict(`Admin id ${uid} already exists`);
+        }
+        return boom.badImplementation();
     }
 };
