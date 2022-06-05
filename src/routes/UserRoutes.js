@@ -20,9 +20,7 @@ const routes = [
     options: {
       validate: {
         payload: Joi.object({
-          street: Joi.string().required(),
-          city: Joi.string().required(),
-          province: Joi.string().required(),
+          pet_id: Joi.string().required(),
         }),
       },
     },
