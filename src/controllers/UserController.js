@@ -2,8 +2,11 @@ const { nanoid } = require('nanoid');
 const verifyUser = require('../middlewares/verifyUser');
 
 exports.createUser = async (request, h) => {
-    const { uid } = request.payload;
+    const { uid, username, email, photoURL } = request.payload;
     const newUser = {
+        username,
+        email,
+        photoURL,
         lastseen: [],
         role: 'user',
         createdAt: new Date(),
@@ -19,7 +22,7 @@ exports.createUser = async (request, h) => {
         const response = h.response({
             status: 'success',
             message: 'User created successfully',
-            data: {
+            user: {
                 uid,
                 createdAt: newUser.createdAt,
             }
@@ -32,6 +35,59 @@ exports.createUser = async (request, h) => {
         return boom.badImplementation();
     }
 };
+
+exports.getUser = async (request, h) => {
+    const { uid } = request.params;
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
+    try {
+        const user = await db.collection('users').doc(uid).get();
+
+        if (!user.exists) {    
+            return boom.notFound(`User id ${uid} not found`);
+        } 
+
+        const response = h.response({
+            status: 'success',
+            message: 'User data retrieved successfully',
+            user: user.data()
+        }).code(200);
+        return response;
+    } catch (error) {
+    }
+}
+
+exports.updateUser = async (request, h) => {
+    verifyUser(request, h);
+
+    const { uid } = request.params;
+    const { username, photoURL } = request.payload;
+    const newUser = {
+        username,
+        photoURL,
+        updatedAt: new Date(),
+    }
+
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
+    try {
+        await db.collection('users').doc(uid).update(newUser);
+
+        const response = h.response({
+            status: 'success',
+            message: 'User updated successfully',
+            user: {
+                uid,
+                updatedAt: newUser.updatedAt,
+            }
+        }).code(200);
+        return response;
+    } catch (error){
+        return boom.badImplementation();
+    }
+}
 
 exports.addLastseen = async(request, h) => {
     verifyUser(request, h);
@@ -56,7 +112,7 @@ exports.addLastseen = async(request, h) => {
         const response = h.response({
             status: 'success',
             message: 'Lastseen was added!',
-            data: {
+            user: {
                 uid,
                 lastseen,
             }

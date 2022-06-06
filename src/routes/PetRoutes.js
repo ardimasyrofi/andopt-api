@@ -8,13 +8,14 @@ const routes = [
     options: {
       validate: {
         payload: Joi.object({
+          id: Joi.string().required(),
           name: Joi.string().required(),
-          imageUrl: Joi.string().required(),
-          age: Joi.string().required(),
+          imageUrls: Joi.array().required(),
+          age: Joi.string().optional(),
           gender: Joi.string().required(),
           type: Joi.object().required(),
           location: Joi.string().required(),
-          description: Joi.string().optional()
+          desc: Joi.string().required()
         }),
       },
     },

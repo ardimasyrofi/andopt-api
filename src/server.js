@@ -9,7 +9,8 @@ const init = async () => {
         host: 'localhost',
         routes: {
             cors: {
-            origin: ['*']
+                origin: ['*'],
+                additionalHeaders: ['x-firebase-token']
             }
         }
     });

@@ -4,16 +4,17 @@ exports.createPet = async (request, h) => {
     verifyUser(request, h);
 
     const { uid } = request.params;
-    const { name, imageUrl, age, gender, type, location, description } = request.payload;
+    const { id, name, imageUrls, age, gender, type, location, desc } = request.payload;
     const newPet = {
+        id,
         user_uid: uid,
         name,
-        imageUrl,
+        imageUrls,
         age,
         gender,
         type,
         location,
-        description: description || "",
+        desc,
         createdAt: new Date(),
         updatedAt: new Date()
     }
@@ -22,12 +23,12 @@ exports.createPet = async (request, h) => {
     const { boom } = request.server.app;
 
     try {
-        const pet = await db.collection('pets').add(newPet);
+        const pet = await db.collection('pets').doc(id).set(newPet);
 
         const response = h.response({
             status: 'success',
             message: 'Pet created successfully',
-            data: {
+            pet: {
                 user_uid: uid,
                 id: pet.id,
                 createdAt: newPet.createdAt,
@@ -50,7 +51,7 @@ exports.getPet = async(request, h) => {
         const response = h.response({
             status: 'success',
             message: 'Pet data retrieved successfully',
-            data: pet.data()
+            pet: pet.data()
         }).code(200);
         return response;
     } catch (error) {
@@ -68,7 +69,7 @@ exports.getAllPets = async (request, h) => {
         const response = h.response({
             status: 'success',
             message: 'All pets retrieved successfully',
-            data: pets.docs.map(doc => doc.data())
+            pets: pets.docs.map(doc => doc.data())
         }).code(200);
         return response;
     } catch (error) {
@@ -101,7 +102,7 @@ exports.updatePet = async(request, h) => {
         const response = h.response({
             status: 'success',
             message: 'Pet updated successfully',
-            data: {
+            pet: {
                 id,
                 updatedAt: new Date(),
             }

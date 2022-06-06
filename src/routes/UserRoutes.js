@@ -9,10 +9,31 @@ const routes = [
       validate: {
         payload: Joi.object({
           uid: Joi.string().required(),
+          username: Joi.string().required(),
+          email: Joi.string().required(),
+          photoURL: Joi.string().required()
         }),
       },
     },
     handler: UserController.createUser,
+  },
+  {
+    method: 'GET',
+    path: '/user/{uid}',
+    handler: UserController.getUser,
+  },
+  {
+    method: 'POST',
+    path: '/user/{uid}/update',
+    options: {
+      validate: {
+        payload: Joi.object({
+          username: Joi.string().required(),
+          photoURL: Joi.string().required()
+        }),
+      },
+    },
+    handler: UserController.updateUser,
   },
   {
     method: 'POST',
@@ -20,9 +41,7 @@ const routes = [
     options: {
       validate: {
         payload: Joi.object({
-          street: Joi.string().required(),
-          city: Joi.string().required(),
-          province: Joi.string().required(),
+          pet_id: Joi.string().required(),
         }),
       },
     },
