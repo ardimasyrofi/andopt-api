@@ -53,6 +53,23 @@ const routes = [
     method: 'DELETE',
     path: '/user/{uid}/pet/{id}',
     handler: PetController.deletePet,
+  },
+  {
+    method: 'POST',
+    path: '/user/{uid}/pet/{pet_id}/like',
+    options: {
+      validate: {
+        payload: Joi.object({
+          id: Joi.string().required(),
+        }),
+      },
+    },
+    handler: PetController.createLikePets,
+  }, 
+  {
+    method: 'DELETE',
+    path: '/user/{uid}/pet/{pet_id}/like',
+    handler: PetController.deleteLikePets,
   }, 
 ];
 

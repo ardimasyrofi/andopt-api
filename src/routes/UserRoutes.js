@@ -23,7 +23,7 @@ const routes = [
     handler: UserController.getUser,
   },
   {
-    method: 'POST',
+    method: 'POST',//PUT?
     path: '/user/{uid}/update',
     options: {
       validate: {

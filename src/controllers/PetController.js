@@ -135,3 +135,63 @@ exports.deletePet = async(request, h) => {
     }
 };
 
+// 2.1 - Create Like Pets
+exports.createLikePets = async(request, h) =>{
+    // verifyUser(request,h);
+
+    const { uid } = request.params;
+    const { pet_id } = request.params;
+    const { id } = request.payload;
+    const newLike = {
+        id,
+        user_uid: uid,
+        pet_id: pet_id,
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
+    try {
+       const like = await db.collection('likes').doc(id).set(newLike);
+
+        const response = h.response({
+            status: 'success',
+            message: 'Favorite pet created successfully',
+            like: {
+                user_uid: uid,
+                pet_id: pet_id,
+                id: like.id,
+                createdAt: newLike.createdAt,
+            }
+        }).code(201);
+        return response;
+    } catch (error) {
+        const response = boom.badRequest(error);
+        return response;
+    }
+};
+
+// 2.2 - Delete Like Pets
+exports.deleteLikePets = async(request, h) => {
+    erifyUser(request, h);
+
+    const { uid } = request.params;
+    const { pet_id } = request.params;
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
+    try {
+        await db.collection('likes').doc(id).delete();
+
+        const response = h.response({
+            status: 'success',
+            message: 'Favorite pet deleted successfully',
+        }).code(200);
+        return response;
+    } catch (error) {
+        const response = boom.badRequest(error);
+        return response;
+    }
+};
