@@ -1,7 +1,7 @@
 const verifyUser = require('../middlewares/verifyUser');
 
 exports.createPet = async (request, h) => {
-    verifyUser(request, h);
+    // verifyUser(request, h);
 
     const { uid } = request.params;
     const { id, name, imageUrls, age, gender, type, location, desc } = request.payload;
