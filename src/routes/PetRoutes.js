@@ -68,9 +68,9 @@ const routes = [
   }, 
   {
     method: 'DELETE',
-    path: '/user/{uid}/pet/{pet_id}/like',
+    path: '/user/{uid}/pet/{pet_id}/like/{id}',
     handler: PetController.deleteLikePets,
-  }, 
+  },
 ];
 
 module.exports = routes;

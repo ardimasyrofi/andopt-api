@@ -137,7 +137,7 @@ exports.deletePet = async(request, h) => {
 
 // 2.1 - Create Like Pets
 exports.createLikePets = async(request, h) =>{
-    // verifyUser(request,h);
+    verifyUser(request,h);
 
     const { uid } = request.params;
     const { pet_id } = request.params;
@@ -175,10 +175,9 @@ exports.createLikePets = async(request, h) =>{
 
 // 2.2 - Delete Like Pets
 exports.deleteLikePets = async(request, h) => {
-    erifyUser(request, h);
+    verifyUser(request, h);
 
-    const { uid } = request.params;
-    const { pet_id } = request.params;
+    const { id } = request.params;
     const { db } = request.server.app.firestore;
     const { boom } = request.server.app;
 
