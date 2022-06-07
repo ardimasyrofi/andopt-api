@@ -71,6 +71,23 @@ const routes = [
     path: '/user/{uid}/pet/{pet_id}/like/{id}',
     handler: PetController.deleteLikePets,
   },
+  {
+    method: 'POST',
+    path: '/user/{uid}/pet/{pet_id}',
+    options: {
+      validate: {
+        payload: Joi.object({
+          isAdopted: Joi.boolean().required(),
+        }),
+      },
+    },
+    handler: PetController.createAdopt,
+  },
+  {
+    method: 'GET',
+    path: '/pets/{name}/{type}',
+    handler: PetController.searchPets,
+  },
 ];
 
 module.exports = routes;

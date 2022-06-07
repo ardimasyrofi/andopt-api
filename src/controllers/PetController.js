@@ -15,6 +15,7 @@ exports.createPet = async (request, h) => {
         type,
         location,
         desc,
+        isAdopted: false,
         createdAt: new Date(),
         updatedAt: new Date()
     }
@@ -190,6 +191,60 @@ exports.deleteLikePets = async(request, h) => {
         }).code(200);
         return response;
     } catch (error) {
+        const response = boom.badRequest(error);
+        return response;
+    }
+};
+
+//3.1 Adopt
+exports.createAdopt = async (request, h) => {
+    verifyUser(request, h);
+
+    const { pet_id } = request.params;
+    const { isAdopted } = request.payload;
+    const updatedPet = {
+        isAdopted,
+        updatedAt: new Date(),
+    }
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
+    try {
+        await db.collection('pets').doc(id).update(updatedPet);
+
+        const response = h.response({
+            status: 'success',
+            message: 'Pet Adopted successfully',
+            pet: {
+                id: pet_id,
+                updatedAt: new Date(),
+            }
+        }).code(200);
+        return response;
+    } catch (error) {
+        const response = boom.badRequest(error);
+        return response;
+    }
+};
+
+// 3.2 Search
+exports.searchPets = async (request, h) => {
+    // verifyUser(request, h);
+
+    const { name } = request.params;
+    const { type } = request.params;
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
+    try{
+        const pets = await db.collection('pets').where('name', '==', name).where('type', '==', type).get();
+        const response = h.response({
+            status: 'success',
+            message: 'Pet searched successfully',
+            pets: pets.docs.map(doc => doc.data())
+        }).code(200);
+        return response;
+    }catch (error) {
         const response = boom.badRequest(error);
         return response;
     }
