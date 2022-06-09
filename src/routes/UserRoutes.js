@@ -23,8 +23,8 @@ const routes = [
     handler: UserController.getUser,
   },
   {
-    method: 'POST',
-    path: '/user/{uid}/update',
+    method: 'PUT',
+    path: '/user/{uid}',
     options: {
       validate: {
         payload: Joi.object({

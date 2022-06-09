@@ -53,7 +53,51 @@ const routes = [
     method: 'DELETE',
     path: '/user/{uid}/pet/{id}',
     handler: PetController.deletePet,
+  },
+  {
+    method: 'POST',
+    path: '/pet/{pet_id}/like',
+    options: {
+      validate: {
+        payload: Joi.object({
+          user_uid: Joi.string().required(),
+        }),
+      },
+    },
+    handler: PetController.createLikePet,
+  },
+  {
+    method: 'GET',
+    path: '/pet/{pet_id}/likes',
+    handler: PetController.getAllLikes,
   }, 
+  {
+    method: 'GET',
+    path: '/user/{user_uid}/likes',
+    handler: PetController.getAllLikesByUser,
+  }, 
+  {
+    method: 'DELETE',
+    path: '/pet/{pet_id}/like/{id}',
+    handler: PetController.deleteLikePets,
+  },
+  {
+    method: 'POST',
+    path: '/user/{uid}/pet/{pet_id}',
+    options: {
+      validate: {
+        payload: Joi.object({
+          isAdopted: Joi.boolean().required(),
+        }),
+      },
+    },
+    handler: PetController.createAdopt,
+  },
+  {
+    method: 'GET',
+    path: '/pets/{name}/{type}',
+    handler: PetController.searchPets,
+  },
 ];
 
 module.exports = routes;

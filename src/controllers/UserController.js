@@ -105,19 +105,35 @@ exports.addLastseen = async(request, h) => {
     const { boom } = request.server.app;
 
     try {
-        await db.collection('users').doc(uid).update({
-            lastseen: FieldValue.arrayUnion(lastseen)
-        });
-        
-        const response = h.response({
+        let isAdded = false;
+        const user = await db.collection('users').doc(uid).get();
+        if (user) {
+            user.data().lastseen.forEach(lastseen => {
+                if (lastseen.pet_id === pet_id) {
+                    isAdded = true;
+                }
+            });
+        }
+        if (!isAdded) {
+            await db.collection('users').doc(uid).update({
+                lastseen: FieldValue.arrayUnion(lastseen)
+            });
+
+            const response = h.response({
+                status: 'success',
+                message: 'Lastseen was added!',
+                user: {
+                    uid,
+                    lastseen,
+                }
+            }).code(201);
+            return response;
+        }
+    
+        return h.response({
             status: 'success',
-            message: 'Lastseen was added!',
-            user: {
-                uid,
-                lastseen,
-            }
-        }).code(201);
-        return response;
+            message: 'Lastseen was already added!',
+        }).code(200);
     } catch (error) {
         return boom.badImplementation();
     }
