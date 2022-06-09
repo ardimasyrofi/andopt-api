@@ -56,19 +56,29 @@ const routes = [
   },
   {
     method: 'POST',
-    path: '/user/{uid}/pet/{pet_id}/like',
+    path: '/pet/{pet_id}/like',
     options: {
       validate: {
         payload: Joi.object({
-          id: Joi.string().required(),
+          user_uid: Joi.string().required(),
         }),
       },
     },
-    handler: PetController.createLikePets,
+    handler: PetController.createLikePet,
+  },
+  {
+    method: 'GET',
+    path: '/pet/{pet_id}/likes',
+    handler: PetController.getAllLikes,
+  }, 
+  {
+    method: 'GET',
+    path: '/user/{user_uid}/likes',
+    handler: PetController.getAllLikesByUser,
   }, 
   {
     method: 'DELETE',
-    path: '/user/{uid}/pet/{pet_id}/like/{id}',
+    path: '/pet/{pet_id}/like/{id}',
     handler: PetController.deleteLikePets,
   },
   {
