@@ -1,0 +1,5 @@
+
+
+npm i inert
+npm i hapi-auth-basic
+npm i hapi-auth-cookie

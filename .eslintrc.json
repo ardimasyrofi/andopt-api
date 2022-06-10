@@ -1,0 +1,27 @@
+{
+    "env": {
+        "browser": true,
+        "commonjs": true,
+        "es2021": true
+    },
+    "extends": [
+        "airbnb-base"
+    ],
+    "parserOptions": {
+        "ecmaVersion": "latest"
+    },
+    "rules": {
+        "no-console": "off"
+    },
+    "folders": [
+        {
+            "path": "project-a"
+        },
+        {
+            "path": "project-b"
+        }
+    ],
+    "settings": {
+        "eslint.nodePath": "myCustomNodePath"
+    }
+}
