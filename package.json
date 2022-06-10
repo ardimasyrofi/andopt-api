@@ -4,14 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon ./src/server.js",
-    "start-serv": "nodemon ./src/serv.js",
-    "start-dev": "nodemon ./src/utils/db.js",
-    "build": "nodemon ./app.js",
-    "build-app": "nodemon ./apps.js",
-    "build-apk": "nodemon ./apps.js",
-    "lint": "eslint ./",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon ./src/server.js"
   },
   "keywords": [],
   "author": "",
