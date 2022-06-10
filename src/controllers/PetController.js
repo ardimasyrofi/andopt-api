@@ -283,17 +283,27 @@ exports.createAdopt = async (request, h) => {
 exports.searchPets = async (request, h) => {
     // verifyUser(request, h);
 
-    const { name } = request.params;
-    const { type } = request.params;
+    const { query, location } = request.params;
     const { db } = request.server.app.firestore;
     const { boom } = request.server.app;
 
     try{
-        const pets = await db.collection('pets').where('name', '==', name).where('type', '==', type).get();
+        const result = await db.collection('pets').where('location', '==', location).get();
+        const pets = [];
+        result.docs.forEach(doc => {
+            const type = doc.data().type.name.toLowerCase() + ' ' + doc.data().type.race.toLowerCase();
+            if(type.includes(query.toLowerCase())){
+                pets.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            }
+        });
+
         const response = h.response({
             status: 'success',
             message: 'Pet searched successfully',
-            pets: pets.docs.map(doc => doc.data())
+            pets
         }).code(200);
         return response;
     }catch (error) {

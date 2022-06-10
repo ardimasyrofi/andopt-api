@@ -95,7 +95,7 @@ const routes = [
   },
   {
     method: 'GET',
-    path: '/pets/{name}/{type}',
+    path: '/pets/{query}/{location}',
     handler: PetController.searchPets,
   },
 ];
