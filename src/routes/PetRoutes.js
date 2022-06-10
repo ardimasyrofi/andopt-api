@@ -98,6 +98,11 @@ const routes = [
     path: '/pets/{query}/{location}',
     handler: PetController.searchPets,
   },
+  {
+    method: 'GET',
+    path: '/pets/newest',
+    handler: PetController.getNewestPets,
+  },
 ];
 
 module.exports = routes;

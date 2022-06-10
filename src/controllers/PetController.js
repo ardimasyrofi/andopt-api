@@ -281,8 +281,6 @@ exports.createAdopt = async (request, h) => {
 
 // 3.2 Search
 exports.searchPets = async (request, h) => {
-    // verifyUser(request, h);
-
     const { query, location } = request.params;
     const { db } = request.server.app.firestore;
     const { boom } = request.server.app;
@@ -311,3 +309,27 @@ exports.searchPets = async (request, h) => {
         return response;
     }
 };
+
+exports.getNewestPets = async (request, h) => {
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
+    try{
+        const pets = await db.collection('pets').orderBy('createdAt', 'desc').limit(12).get();
+
+        const response = h.response({
+            status: 'success',
+            message: 'Newest pets retrieved successfully',
+            pets: pets.docs.map(doc => {
+                return {
+                    id: doc.id,
+                    ...doc.data()
+                }
+            })
+        }).code(200);
+        return response;
+    }catch (error) {
+        const response = boom.badRequest(error);
+        return response;
+    }
+}
