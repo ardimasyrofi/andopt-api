@@ -2,6 +2,7 @@ const Hapi = require('@hapi/hapi');
 const boom = require('@hapi/boom');
 const routes = require('./routes');
 const firebase = require('./services/firebase');
+require('dotenv').config();
 
 const init = async () => {
     const server = Hapi.server({
