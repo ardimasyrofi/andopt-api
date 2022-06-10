@@ -286,11 +286,14 @@ exports.searchPets = async (request, h) => {
     const { boom } = request.server.app;
 
     try{
-        const result = await db.collection('pets').where('location', '==', location).get();
+        const result = await db.collection('pets').get();
         const pets = [];
         result.docs.forEach(doc => {
-            const type = doc.data().type.name.toLowerCase() + ' ' + doc.data().type.race.toLowerCase();
-            if(type.includes(query.toLowerCase())){
+            const typeLoweredCase = doc.data().type.name.toLowerCase() + ' ' + doc.data().type.race.toLowerCase();
+            const queryLoweredCase = query.toLowerCase();
+            const petLocLoweredCase = doc.data().location.toLowerCase();
+            const locLoweredCase = location.toLowerCase();
+            if(typeLoweredCase.includes(queryLoweredCase)&&petLocLoweredCase.includes(locLoweredCase)){
                 pets.push({
                     id: doc.id,
                     ...doc.data()
