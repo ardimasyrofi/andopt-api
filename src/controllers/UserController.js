@@ -51,7 +51,10 @@ exports.getUser = async (request, h) => {
         const response = h.response({
             status: 'success',
             message: 'User data retrieved successfully',
-            user: user.data()
+            user: {
+                id: uid,
+                ...user.data()
+            }
         }).code(200);
         return response;
     } catch (error) {

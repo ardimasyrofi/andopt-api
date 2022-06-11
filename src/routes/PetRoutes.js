@@ -100,6 +100,16 @@ const routes = [
   },
   {
     method: 'GET',
+    path: '/pets/query/{query}',
+    handler: PetController.searchPetsByQuery,
+  },
+  {
+    method: 'GET',
+    path: '/pets/location/{location}',
+    handler: PetController.searchPetsByLoc,
+  },
+  {
+    method: 'GET',
     path: '/pets/newest',
     handler: PetController.getNewestPets,
   },

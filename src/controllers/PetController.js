@@ -52,7 +52,10 @@ exports.getPet = async(request, h) => {
         const response = h.response({
             status: 'success',
             message: 'Pet data retrieved successfully',
-            pet: pet.data()
+            pet:  {
+                id,
+                ...pet.data()
+            }
         }).code(200);
         return response;
     } catch (error) {
@@ -70,7 +73,12 @@ exports.getAllPets = async (request, h) => {
         const response = h.response({
             status: 'success',
             message: 'All pets retrieved successfully',
-            pets: pets.docs.map(doc => doc.data())
+            pets: pets.docs.map(doc => {
+                return {
+                    id: doc.id,
+                    ...doc.data()
+                }  
+            })
         }).code(200);
         return response;
     } catch (error) {
@@ -294,6 +302,102 @@ exports.searchPets = async (request, h) => {
             const petLocLoweredCase = doc.data().location.toLowerCase();
             const locLoweredCase = location.toLowerCase();
             if(typeLoweredCase.includes(queryLoweredCase)&&petLocLoweredCase.includes(locLoweredCase)){
+                pets.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            }
+        });
+
+        const response = h.response({
+            status: 'success',
+            message: 'Pet searched successfully',
+            pets
+        }).code(200);
+        return response;
+    }catch (error) {
+        const response = boom.badRequest(error);
+        return response;
+    }
+};
+
+// 3.2 Search type
+// exports.searchPetsByType = async (request, h) => {
+//     const { type } = request.params;
+//     const { db } = request.server.app.firestore;
+//     const { boom } = request.server.app;
+
+//     try{
+//         const result = await db.collection('pets').get();
+//         const pets = [];
+//         result.docs.forEach(doc => {
+//             const typeName = doc.data().type.name.toLowerCase();
+
+//             if(typeName.includes(type.toLowerCase())){
+//                 pets.push({
+//                     id: doc.id,
+//                     ...doc.data()
+//                 });
+//             }
+//         });
+
+//         const response = h.response({
+//             status: 'success',
+//             message: 'Pet searched successfully',
+//             pets
+//         }).code(200);
+//         return response;
+//     }catch (error) {
+//         const response = boom.badRequest(error);
+//         return response;
+//     }
+// }
+
+//Search by Query
+exports.searchPetsByQuery = async (request, h) => {
+    const { query } = request.params;
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
+    try{
+        const result = await db.collection('pets').get();
+        const pets = [];
+        result.docs.forEach(doc => {
+            const typeLoweredCase = doc.data().type.name.toLowerCase() + ' ' + doc.data().type.race.toLowerCase();
+            const queryLoweredCase = query.toLowerCase();
+            if(typeLoweredCase.includes(queryLoweredCase)){
+                pets.push({
+                    id: doc.id,
+                    ...doc.data()
+                });
+            }
+        });
+
+        const response = h.response({
+            status: 'success',
+            message: 'Pet searched successfully',
+            pets
+        }).code(200);
+        return response;
+    }catch (error) {
+        const response = boom.badRequest(error);
+        return response;
+    }
+};
+
+//Search by Loc
+exports.searchPetsByLoc = async (request, h) => {
+    const { location } = request.params;
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
+    try{
+        const result = await db.collection('pets').get();
+        const pets = [];
+        result.docs.forEach(doc => {
+            const petLocLoweredCase = doc.data().location.toLowerCase();
+            const locLoweredCase = location.toLowerCase();
+            if(petLocLoweredCase.includes(locLoweredCase)){
                 pets.push({
                     id: doc.id,
                     ...doc.data()
