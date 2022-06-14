@@ -1,5 +1,6 @@
 const verifyUser = require('../middlewares/verifyUser');
 
+//Get All Users
 exports.getAllUsers = async (request, h) => {
     const { db } = request.server.app.firestore;
     const { boom } = request.server.app;
@@ -89,7 +90,7 @@ exports.searchUserByUsername = async (request, h) => {
     }
 };
 
-//Search User by Role
+//Search User By Role
 exports.searchUserByRole = async (request, h) => {
     const { role } = request.params;
     const { db } = request.server.app.firestore;
