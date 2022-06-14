@@ -208,6 +208,68 @@ exports.getAllArticles = async (request, h) => {
     }
 };
 
+//Edit Articles
+exports.updateArticle = async(request, h) => {
+    verifyUser(request, h);
+
+    const { id } = request.params;
+    const { tittle, imageUrls, type, contents} = request.payload;
+    const updatedArticle = {
+        tittle,
+        imageUrls,
+        type,
+        contents,
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
+    try {
+        await db.collection('articles').doc(id).update(updatedArticle);
+
+        const response = h.response({
+            status: 'success',
+            message: 'Article updated successfully',
+            article: {
+                id,
+                updatedAt: new Date(),
+            }
+        }).code(200);
+        return response;
+    } catch (error) {
+        const response = boom.badRequest(error);
+        return response;
+    }
+};
+
+//Delete Articles
+exports.deleteArticle = async(request, h) => {
+    verifyUser(request, h);
+
+    const { id } = request.params;
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
+    try {
+        await db.collection('articles').doc(id).delete();
+
+        const response = h.response({
+            status: 'success',
+            message: 'Article deleted successfully',
+        }).code(200);
+        return response;
+    } catch (error) {
+        const response = boom.badRequest(error);
+        return response;
+    }
+};
+
+
+
+
+
+
 // const UserModel = require('../models/UserModel');
 // const { getAuth } = require('firebase-admin');
 

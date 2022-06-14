@@ -48,6 +48,26 @@ const routes = [
     path: '/articles',
     handler: AdminController.getAllArticles,
   },
+  {
+    method: 'PUT',
+    path: '/article/{id}',
+    options: {
+      validate: {
+        payload: Joi.object({
+          tittle: Joi.string().required(),
+          imageUrls: Joi.string().required(),
+          type: Joi.string().required(),
+          contents: Joi.string().required(),
+        }),
+      },
+    },      
+    handler: AdminController.updateArticle,
+  },
+  {
+    method: 'DELETE',
+    path: '/article/{id}',
+    handler: AdminController.deleteArticle,
+  }
 ];
 
 module.exports = routes;
