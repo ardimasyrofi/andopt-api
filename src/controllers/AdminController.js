@@ -160,6 +160,53 @@ exports.createArticle = async (request, h) => {
     }
 };
 
+//Get Articles
+exports.getArticle = async(request, h) => {
+    const { id } = request.params;
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
+    try {
+        const article = await db.collection('articles').doc(id).get();
+        const response = h.response({
+            status: 'success',
+            message: 'Article data retrieved successfully',
+            article:  {
+                id,
+                ...article.data()
+            }
+        }).code(200);
+        return response;
+    } catch (error) {
+        const response = boom.badRequest(error);
+        return response;
+    }
+};
+
+//Get All Articles
+exports.getAllArticles = async (request, h) => {
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
+    try {
+        const articles = await db.collection('articles').get();
+        const response = h.response({
+            status: 'success',
+            message: 'All articles retrieved successfully',
+            articles: articles.docs.map(doc => {
+                return {
+                    id: doc.id,
+                    ...doc.data()
+                }  
+            })
+        }).code(200);
+        return response;
+    } catch (error) {
+        const response = boom.badRequest(error);
+        return response;
+    }
+};
+
 // const UserModel = require('../models/UserModel');
 // const { getAuth } = require('firebase-admin');
 

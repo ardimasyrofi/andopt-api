@@ -38,6 +38,16 @@ const routes = [
     },
     handler: AdminController.createArticle,
   },
+  {
+    method: 'GET',
+    path: '/article/{id}',
+    handler: AdminController.getArticle,
+  },
+  {
+    method: 'GET',
+    path: '/articles',
+    handler: AdminController.getAllArticles,
+  },
 ];
 
 module.exports = routes;
