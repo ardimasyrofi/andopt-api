@@ -67,7 +67,12 @@ const routes = [
     method: 'DELETE',
     path: '/article/{id}',
     handler: AdminController.deleteArticle,
-  }
+  },
+  {
+    method: 'GET',
+    path: '/articles/newest',
+    handler: AdminController.getNewestArticles,
+  },
 ];
 
 module.exports = routes;

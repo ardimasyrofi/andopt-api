@@ -265,6 +265,30 @@ exports.deleteArticle = async(request, h) => {
     }
 };
 
+//Get Newest Articles
+exports.getNewestArticles = async (request, h) => {
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
+    try{
+        const articles = await db.collection('articles').orderBy('createdAt', 'desc').limit(12).get();
+
+        const response = h.response({
+            status: 'success',
+            message: 'Newest articles retrieved successfully',
+            articles: articles.docs.map(doc => {
+                return {
+                    id: doc.id,
+                    ...doc.data()
+                }
+            })
+        }).code(200);
+        return response;
+    }catch (error) {
+        const response = boom.badRequest(error);
+        return response;
+    }
+}
 
 
 
