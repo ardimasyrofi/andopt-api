@@ -9,20 +9,35 @@ const routes = [
   },
   {
     method: 'GET',
-    path: '/users/{username}/{role}',
+    path: '/user/{username}/{role}',
     handler: AdminController.searchUser,
   },
   {
     method: 'GET',
-    path: '/users/username/{username}',
+    path: '/user/username/{username}',
     handler: AdminController.searchUserByUsername,
   },
   {
     method: 'GET',
-    path: '/users/role/{role}',
+    path: '/user/role/{role}',
     handler: AdminController.searchUserByRole,
   },
-  
+  {
+    method: 'POST',
+    path: '/user/{uid}/article',
+    options: {
+      validate: {
+        payload: Joi.object({
+          id : Joi.string().required(),
+          tittle: Joi.string().required(),
+          imageUrls: Joi.string().required(),
+          type: Joi.string().required(),
+          contents: Joi.string().required(),
+        }),
+      },
+    },
+    handler: AdminController.createArticle,
+  },
 ];
 
 module.exports = routes;

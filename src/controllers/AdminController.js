@@ -121,6 +121,44 @@ exports.searchUserByRole = async (request, h) => {
     }
 };
 
+//Create Article
+exports.createArticle = async (request, h) => {
+    // verifyUser(request, h);
+
+    const { uid } = request.params;
+    const { id, tittle, imageUrls, type, contents} = request.payload;
+    const newArticle = {
+        id,
+        user_uid: uid,
+        tittle,
+        imageUrls,
+        type,
+        contents,
+        createdAt: new Date(),
+        updatedAt: new Date()
+    }
+
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
+    try {
+        const article = await db.collection('articles').doc(id).set(newArticle);
+
+        const response = h.response({
+            status: 'success',
+            message: 'Article created successfully',
+            pet: {
+                user_uid: uid,
+                id: article.id,
+                createdAt: newArticle.createdAt,
+            }
+        }).code(201);
+        return response;
+    } catch (error) {
+        const response = boom.badRequest(error);
+        return response;
+    }
+};
 
 // const UserModel = require('../models/UserModel');
 // const { getAuth } = require('firebase-admin');
