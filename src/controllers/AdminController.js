@@ -144,6 +144,52 @@ exports.deleteUsers = async (request, h) => {
     }
 };
 
+//Get All Pets
+exports.getAllPets = async (request, h) => {
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
+    try {
+        const pets = await db.collection('pets').get();
+        const response = h.response({
+            status: 'success',
+            message: 'All Pets retrieved successfully',
+            pets: pets.docs.map(doc => {
+                return {
+                    id: doc.id,
+                    ...doc.data()
+                }
+            })
+        }).code(200);
+        return response;
+    } catch (error) {
+        const response = boom.badRequest(error);
+        return response;
+    }
+};
+
+//Delete Pet
+exports.deletePets = async(request, h) => {
+    verifyUser(request, h);
+
+    const { id } = request.params;
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
+    try {
+        await db.collection('pets').doc(id).delete();
+
+        const response = h.response({
+            status: 'success',
+            message: 'Pet deleted successfully',
+        }).code(200);
+        return response;
+    } catch (error) {
+        const response = boom.badRequest(error);
+        return response;
+    }
+};
+
 //Create Article
 exports.createArticle = async (request, h) => {
     verifyUser(request, h);

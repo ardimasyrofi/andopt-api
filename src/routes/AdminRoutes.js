@@ -28,6 +28,16 @@ const routes = [
     handler: AdminController.deleteUsers,
   },
   {
+    method: 'GET',
+    path: '/pet',
+    handler: AdminController.getAllPets,
+  },
+  {
+    method: 'DELETE',
+    path: '/pet/id/{id}',
+    handler: AdminController.deletePets,
+  },
+  {
     method: 'POST',
     path: '/user/{uid}/article',
     options: {
