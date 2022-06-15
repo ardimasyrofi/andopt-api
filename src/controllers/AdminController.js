@@ -122,9 +122,31 @@ exports.searchUserByRole = async (request, h) => {
     }
 };
 
+//Delete User
+exports.deleteUsers = async (request, h) => {
+    verifyUser(request, h);
+
+    const { uid } = request.params;
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
+    try {
+        const users = await db.collection('users').doc(uid).delete();
+        const response = h.response({
+            status: 'success',
+            message: 'User deleted successfully',
+            users
+        }).code(200);
+        return response;
+    } catch (error) {
+        const response = boom.badRequest(error);
+        return response;
+    }
+};
+
 //Create Article
 exports.createArticle = async (request, h) => {
-    // verifyUser(request, h);
+    verifyUser(request, h);
 
     const { uid } = request.params;
     const { id, tittle, imageUrls, type, contents} = request.payload;
@@ -160,6 +182,7 @@ exports.createArticle = async (request, h) => {
         return response;
     }
 };
+
 
 //Get Articles
 exports.getArticle = async(request, h) => {

@@ -23,6 +23,11 @@ const routes = [
     handler: AdminController.searchUserByRole,
   },
   {
+    method: 'DELETE',
+    path: '/user/uid/{uid}',
+    handler: AdminController.deleteUsers,
+  },
+  {
     method: 'POST',
     path: '/user/{uid}/article',
     options: {
