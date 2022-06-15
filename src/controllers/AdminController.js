@@ -28,8 +28,10 @@ exports.getAdmin = async (request, h) => {
 
 //Update Admin
 exports.updateAdmin = async (request, h) => {
-    verifyUser(request, h);
-
+    const user = verifyUser(request, h);
+    if (user.data().role !== 'admin') {
+        return boom.unauthorized('You are not authorized to perform this action');
+    }
     const { uid } = request.params;
     const { username, photoURL } = request.payload;
     const newAdmin = {
@@ -182,7 +184,10 @@ exports.searchUserByRole = async (request, h) => {
 
 //Delete User
 exports.deleteUsers = async (request, h) => {
-    verifyUser(request, h);
+    const user = verifyUser(request, h);
+    if (user.data().role !== 'admin') {
+        return boom.unauthorized('You are not authorized to perform this action');
+    }
 
     const { uid } = request.params;
     const { db } = request.server.app.firestore;
@@ -202,33 +207,12 @@ exports.deleteUsers = async (request, h) => {
     }
 };
 
-//Get All Pets
-exports.getAllPets = async (request, h) => {
-    const { db } = request.server.app.firestore;
-    const { boom } = request.server.app;
-
-    try {
-        const pets = await db.collection('pets').get();
-        const response = h.response({
-            status: 'success',
-            message: 'All Pets retrieved successfully',
-            pets: pets.docs.map(doc => {
-                return {
-                    id: doc.id,
-                    ...doc.data()
-                }
-            })
-        }).code(200);
-        return response;
-    } catch (error) {
-        const response = boom.badRequest(error);
-        return response;
-    }
-};
-
 //Delete Pet
 exports.deletePets = async(request, h) => {
-    verifyUser(request, h);
+    const user = verifyUser(request, h);
+    if (user.data().role !== 'admin') {
+        return boom.unauthorized('You are not authorized to perform this action');
+    }
 
     const { id } = request.params;
     const { db } = request.server.app.firestore;
@@ -250,7 +234,10 @@ exports.deletePets = async(request, h) => {
 
 //Create Article
 exports.createArticle = async (request, h) => {
-    verifyUser(request, h);
+    const user = verifyUser(request, h);
+    if (user.data().role !== 'admin') {
+        return boom.unauthorized('You are not authorized to perform this action');
+    }
 
     const { uid } = request.params;
     const { id, tittle, imageUrls, type, contents} = request.payload;
@@ -337,7 +324,10 @@ exports.getAllArticles = async (request, h) => {
 
 //Edit Articles
 exports.updateArticle = async(request, h) => {
-    verifyUser(request, h);
+    const user = verifyUser(request, h);
+    if (user.data().role !== 'admin') {
+        return boom.unauthorized('You are not authorized to perform this action');
+    }
 
     const { id } = request.params;
     const { tittle, imageUrls, type, contents} = request.payload;
@@ -372,7 +362,10 @@ exports.updateArticle = async(request, h) => {
 
 //Delete Articles
 exports.deleteArticle = async(request, h) => {
-    verifyUser(request, h);
+    const user = verifyUser(request, h);
+    if (user.data().role !== 'admin') {
+        return boom.unauthorized('You are not authorized to perform this action');
+    }
 
     const { id } = request.params;
     const { db } = request.server.app.firestore;
