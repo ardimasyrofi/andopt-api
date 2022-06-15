@@ -1,5 +1,63 @@
 const verifyUser = require('../middlewares/verifyUser');
 
+//Get Admin
+exports.getAdmin = async (request, h) => {
+    const { uid } = request.params;
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
+    try {
+        const admin = await db.collection('admins').doc(uid).get();
+
+        if (!admin.exists) {
+            return boom.notFound(`Admin id ${uid} not found`);
+        }
+
+        const response = h.response({
+            status: 'success',
+            message: 'Admin data retrieved successfully',
+            admin: {
+                id: uid,
+                ...admin.data()
+            }
+        }).code(200);
+        return response;
+    } catch (error) {
+    }
+};
+
+//Update Admin
+exports.updateAdmin = async (request, h) => {
+    verifyUser(request, h);
+
+    const { uid } = request.params;
+    const { username, photoURL } = request.payload;
+    const newAdmin = {
+        username,
+        photoURL,
+        updatedAt: new Date(),
+    }
+
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
+    try {
+        await db.collection('admins').doc(uid).update(newAdmin);
+
+        const response = h.response({
+            status: 'success',
+            message: 'Admin updated successfully',
+            admin: {
+                uid,
+                updatedAt: newAdmin.updatedAt,
+            }
+        }).code(200);
+        return response;
+    } catch (error) {
+        return boom.badImplementation();
+    }
+};
+
 //Get All Users
 exports.getAllUsers = async (request, h) => {
     const { db } = request.server.app.firestore;

@@ -4,6 +4,24 @@ const AdminController = require('../controllers/AdminController');
 const routes = [
   {
     method: 'GET',
+    path: '/admin/{uid}',
+    handler: AdminController.getAdmin,
+  },
+  {
+    method: 'PUT',
+    path: '/admin/{uid}',
+    options: {
+      validate: {
+        payload: Joi.object({
+          username: Joi.string().required(),
+          photoURL: Joi.string().required()
+        }),
+      },
+    },
+    handler: AdminController.updateAdmin,
+  },
+  {
+    method: 'GET',
     path: '/users',
     handler: AdminController.getAllUsers,
   },
