@@ -27,18 +27,8 @@ const routes = [
   },
   {
     method: 'GET',
-    path: '/user/{username}/{role}',
-    handler: AdminController.searchUser,
-  },
-  {
-    method: 'GET',
     path: '/user/username/{username}',
-    handler: AdminController.searchUserByUsername,
-  },
-  {
-    method: 'GET',
-    path: '/user/role/{role}',
-    handler: AdminController.searchUserByRole,
+    handler: AdminController.searchUsers,
   },
   {
     method: 'DELETE',
