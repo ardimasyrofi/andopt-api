@@ -1,9 +1,8 @@
+const verifyUser = require('../middlewares/verifyUser');
+
 //Create Admin
 exports.createAdmin = async (request, h) => {
-    const user = verifyUser(request, h);
-    if (user.data().role !== 'spv') {
-        return boom.unauthorized('You are not authorized to perform this action');
-    }
+    verifyUser(request, h);
 
     const { uid } = request.payload;
     const newUser = {
@@ -45,7 +44,7 @@ exports.getAllAdmin = async (request, h) => {
         const response = h.response({
             status: 'success',
             message: 'All Admin retrieved successfully',
-            admin: admins.docs.map(doc => {
+            admins: admins.docs.map(doc => {
                 return {
                     uid: doc.id,
                     ...doc.data()
@@ -94,10 +93,7 @@ exports.searchAdmin = async (request, h) => {
 
 //Delete Admin
 exports.deleteAdmin = async (request, h) => {
-    const user = verifyUser(request, h);
-    if (user.data().role !== 'spv') {
-        return boom.unauthorized('You are not authorized to perform this action');
-    }
+    verifyUser(request, h);
 
     const { uid } = request.params;
     const { db } = request.server.app.firestore;

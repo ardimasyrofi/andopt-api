@@ -42,15 +42,15 @@ const routes = [
   },
   {
     method: 'POST',
-    path: '/user/{uid}/article',
+    path: '/admin/{uid}/articles',
     options: {
       validate: {
         payload: Joi.object({
           id : Joi.string().required(),
-          tittle: Joi.string().required(),
-          imageUrls: Joi.string().required(),
-          type: Joi.string().required(),
-          contents: Joi.string().required(),
+          title: Joi.string().required(),
+          imageUrl: Joi.string().required(),
+          category: Joi.string().required(),
+          content: Joi.string().required(),
         }),
       },
     },
@@ -72,10 +72,10 @@ const routes = [
     options: {
       validate: {
         payload: Joi.object({
-          tittle: Joi.string().required(),
-          imageUrls: Joi.string().required(),
+          title: Joi.string().required(),
+          imageUrl: Joi.string().required(),
           type: Joi.string().required(),
-          contents: Joi.string().required(),
+          content: Joi.string().required(),
         }),
       },
     },      
