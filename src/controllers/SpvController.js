@@ -1,8 +1,8 @@
+const verifyUser = require('../middlewares/verifyUser');
+
+//Create Admin
 exports.createAdmin = async (request, h) => {
-    const user = verifyUser(request, h);
-    if (user.data().role !== 'spv') {
-        return boom.unauthorized('You are not authorized to perform this action');
-    }
+    verifyUser(request, h);
 
     const { uid } = request.payload;
     const newUser = {
@@ -33,3 +33,83 @@ exports.createAdmin = async (request, h) => {
         return boom.badImplementation();
     }
 };
+
+//Get All Admin
+exports.getAllAdmin = async (request, h) => {
+    const {db} = request.server.app.firestore;
+    const {boom} = request.server.app;
+
+    try {
+        const admins = await db.collection('users').where('role', '==', 'admin').get();
+        const response = h.response({
+            status: 'success',
+            message: 'All Admin retrieved successfully',
+            admins: admins.docs.map(doc => {
+                return {
+                    uid: doc.id,
+                    ...doc.data()
+                }
+            })
+        }).code(200);
+        return response;
+    } catch (error) {
+        const response = boom.badRequest(error);
+        return response;
+    }
+};
+
+//Search Admin
+exports.searchAdmin = async (request, h) => {
+    const {username} = request.params;
+    const {db} = request.server.app.firestore;
+    const {boom} = request.server.app;
+
+    try {
+        const result = await db.collection('users').where('role', '==', 'admin').get();
+        const admins = [];
+        result.docs.forEach(doc => {
+            const nameAdmin = doc.data().username.toLowerCase();
+            const usernameLoweredCase = username.toLowerCase();
+            if(nameAdmin.includes(usernameLoweredCase)){
+                admins.push({
+                    uid: doc.uid,
+                    ...doc.data()
+                });
+            }
+        });
+
+        const response = h.response({
+            status: 'success',
+            message: 'Admin searched successfully',
+            admins
+        }).code(200);
+        return response;
+    } catch (error) {
+        const response = boom.badRequest(error);
+        return response;
+    }
+};
+
+
+//Delete Admin
+exports.deleteAdmin = async (request, h) => {
+    verifyUser(request, h);
+
+    const { uid } = request.params;
+    const { db } = request.server.app.firestore;
+    const { boom } = request.server.app;
+
+    try {
+        const admins = await db.collection('users').where('role', '==', 'admin').doc(uid).delete();
+        const response = h.response({
+            status: 'success',
+            message: 'Admin deleted successfully',
+            admins
+        }).code(200);
+        return response;
+    } catch (error) {
+        const response = boom.badRequest(error);
+        return response;
+    }
+};
+

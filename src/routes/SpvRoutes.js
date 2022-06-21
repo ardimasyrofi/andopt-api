@@ -13,6 +13,21 @@ const routes = [
       },
     },
     handler: SpvController.createAdmin,
+  },
+  {
+    method: 'GET',
+    path: '/admins',
+    handler: SpvController.getAllAdmin,
+  },
+  {
+    method: 'GET',
+    path: '/admin/username/{username}',
+    handler: SpvController.searchAdmin,
+  },
+  {
+    method: 'DELETE',
+    path: '/admin/uid/{uid}',
+    handler: SpvController.deleteAdmin,
   }
 ];
 

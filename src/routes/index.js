@@ -1,11 +1,13 @@
 const UserRoutes = require('./UserRoutes');
 const SpvRoutes = require('./SpvRoutes');
 const PetRoutes = require('./PetRoutes');
+const AdminRoutes = require('./AdminRoutes');
 
 const routes = [
     UserRoutes,
     SpvRoutes,
-    PetRoutes
+    PetRoutes,
+    AdminRoutes
 ];
 
 const bundledRoutes = (() => ({
